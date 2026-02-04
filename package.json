@@ -16,12 +16,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/JeroenWimmers/Bare-Template.git"
+        "url": "git+https://github.com/BareEngine/Template.git"
     },
     "author": "Jeroen Wimmers",
     "license": "MIT",
     "devDependencies": {
-        "@assetpack/core": "^1.7.0",
+		"@assetpack/core": "git+https://github.com/BareEngine/Assetpack.git",
         "@babel/core": "^7.24.5",
         "@babel/preset-env": "^7.24.5",
         "@types/webpack-env": "^1.18.8",
