@@ -1,5 +1,5 @@
 import entityDataJson from '../public/assets/_data/_entityData.json'
-import { StartBare, BareGame, GameObject, BarePlugin, game } from 'bare-engine';
+import { StartBare, BareGame, GameObject, BarePlugin } from 'bare-engine';
 
 export class Game extends BareGame
 {

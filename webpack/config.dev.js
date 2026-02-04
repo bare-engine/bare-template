@@ -66,7 +66,7 @@ module.exports = {
             },
             {
                 test: /\.tsx?$/,
-                exclude: /node_modules/,
+                exclude: /node_modules[\\/](?!bare-engine)/,
                 loader: "esbuild-loader",
                 options: {
                     loader: "ts",
