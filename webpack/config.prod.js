@@ -1,0 +1,118 @@
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlReplaceWebpackPlugin = require("html-replace-webpack-plugin");
+const path = require("path");
+const webpack = require("webpack");
+const fs = require("fs");
+const CompressionPlugin = require("compression-webpack-plugin");
+const rimraf = require("rimraf");
+const PreserveComponentPropertiesPlugin = require('./PreserveComponentPropertiesPlugin');
+const ComponentParamPreserverPlugin = require('./ComponentParamPreserverPlugin');
+const InjectInitialAssetsPlugin = require("./InjectInitialAssetsPlugin");
+const { EsbuildPlugin } = require("esbuild-loader");
+
+function ensureDir(dirPath) {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+}
+
+[
+    path.join(__dirname, "../src/components"),
+    path.join(__dirname, "../src/editorComponents")
+].forEach(ensureDir);
+
+module.exports = {
+    mode: "production",
+    entry: "./src/game.ts",
+    output: {
+        path: path.resolve(process.cwd(), "dist"),
+        filename: "./bundle.min.js"
+    },
+    resolve: {
+        extensions: [".ts", ".js", ".json"],
+        alias: {
+        }
+    },
+    devtool: false,
+    performance: {
+        maxEntrypointSize: 2500000,
+        maxAssetSize: 1200000
+    },
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: "babel-loader"
+                }
+            },
+            {
+                test: /\.tsx?$/,
+                exclude: /node_modules/,
+                loader: "esbuild-loader",
+                options: {
+                    loader: "ts",
+                    target: "es2020"
+                }
+            },
+            {
+                test: [/\.vert$/, /\.frag$/],
+                use: "raw-loader"
+            },
+            {
+                test: /\.(gif|png|jpe?g|svg|xml|glsl)$/i,
+                use: "file-loader"
+            },
+            {
+                test: /\.json$/,
+                type: "json"
+            }
+        ]
+    },
+    optimization: {
+        minimizer: [
+            new EsbuildPlugin({
+                target: "es2020",
+                legalComments: "none",
+                minify: true,
+                keepNames: true
+            })
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            template: "./index.html",
+            inject: false,
+            minify: false
+        }),
+        new HtmlReplaceWebpackPlugin([
+            {
+                pattern: /<!-- js:bootstrap -->/g,
+                replacement: '<script src="./bundle.min.js"></script>',
+                scriptLoading: "blocking",
+                inject: 'head'
+            }
+        ]),
+		new webpack.DefinePlugin({
+			__DEV__: JSON.stringify(false)
+		}),
+        new InjectInitialAssetsPlugin(),
+        new CopyPlugin({
+            patterns: [{ from: "public/assets", to: "assets" }]
+        }),
+        new CopyPlugin({
+            patterns: [{ from: "public/editor.html", to: "" }]
+        }),
+        new (class {
+            apply(compiler) {
+                compiler.hooks.done.tap("Remove EmojiData", () => {
+                    rimraf.sync("./dist/assets/data/emojiData.json");
+                });
+            }
+        })()
+    ]
+};

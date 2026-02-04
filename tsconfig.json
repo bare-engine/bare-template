@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "outDir": "./dist/",
+        "moduleResolution": "bundler",
+        "baseUrl": "./src"
+    },
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "categories": [
+        {
+			"Objects": {
+				"image": "⚙",
+				"entries": ["⚙" ]
+			}
+        }
+    ],
+    "entityBases": {
+        "ANY": {
+            
+		}
+    },
+    "entities": {
+
+    }
+}
