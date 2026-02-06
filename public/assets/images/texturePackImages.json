@@ -1,0 +1,272 @@
+{
+  "frames": {
+    "buffalo_run_05": {
+      "frame": {
+        "x": 2,
+        "y": 2,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    },
+    "buffalo_run_04": {
+      "frame": {
+        "x": 2,
+        "y": 37,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    },
+    "buffalo_run_03": {
+      "frame": {
+        "x": 64,
+        "y": 2,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    },
+    "buffalo_run_02": {
+      "frame": {
+        "x": 64,
+        "y": 37,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    },
+    "buffalo_run_01": {
+      "frame": {
+        "x": 2,
+        "y": 72,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    },
+    "buffalo_run_00": {
+      "frame": {
+        "x": 64,
+        "y": 72,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    },
+    "buffalo_eat_03": {
+      "frame": {
+        "x": 2,
+        "y": 107,
+        "w": 60,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 34
+      }
+    },
+    "buffalo_eat_02": {
+      "frame": {
+        "x": 64,
+        "y": 107,
+        "w": 60,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 34
+      }
+    },
+    "buffalo_eat_01": {
+      "frame": {
+        "x": 126,
+        "y": 2,
+        "w": 60,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 34
+      }
+    },
+    "buffalo_eat_00": {
+      "frame": {
+        "x": 126,
+        "y": 38,
+        "w": 60,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 34
+      }
+    },
+    "barn": {
+      "frame": {
+        "x": 2,
+        "y": 143,
+        "w": 384,
+        "h": 379
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 379
+      },
+      "sourceSize": {
+        "w": 384,
+        "h": 379
+      }
+    },
+    "test/buffalo_run_03": {
+      "frame": {
+        "x": 126,
+        "y": 74,
+        "w": 60,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 33
+      }
+    }
+  },
+  "animations": {
+    "buffalo_eat": [
+      "buffalo_eat_00",
+      "buffalo_eat_01",
+      "buffalo_eat_02",
+      "buffalo_eat_03"
+    ],
+    "buffalo_run": [
+      "buffalo_run_00",
+      "buffalo_run_01",
+      "buffalo_run_02",
+      "buffalo_run_03",
+      "buffalo_run_04",
+      "buffalo_run_05"
+    ]
+  },
+  "meta": {
+    "app": "http://github.com/pixijs/assetpack",
+    "version": "1.0",
+    "image": "texturePackImages.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 388,
+      "h": 524
+    },
+    "scale": 1,
+    "related_multi_packs": []
+  }
+}
