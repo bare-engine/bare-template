@@ -188,6 +188,95 @@ module.exports = {
                 });
             });
 
+            // Create level endpoint
+            devServer.app.post('/api/create-level', (req, res) => {
+                let body = '';
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+                req.on('end', () => {
+                    try {
+                        const { levelData, path: levelPath } = JSON.parse(body);
+                        if (!levelData || !levelData.name) {
+                            throw new Error('levelData.name is required');
+                        }
+                        if (!levelPath) {
+                            throw new Error('path is required');
+                        }
+
+                        const safePath = String(levelPath);
+                        if (safePath.includes("..") || safePath.startsWith("..")) {
+                            throw new Error('Invalid path');
+                        }
+
+                        const fullPath = path.join(__dirname, '../public', safePath);
+                        const dir = path.dirname(fullPath);
+
+                        if (!fs.existsSync(dir)) {
+                            fs.mkdirSync(dir, { recursive: true });
+                        }
+
+                        if (fs.existsSync(fullPath)) {
+                            res.status(409).setHeader('Content-Type', 'application/json');
+                            res.end(JSON.stringify({ error: `Level already exists: ${safePath}` }));
+                            return;
+                        }
+
+                        fs.writeFileSync(fullPath, JSON.stringify(levelData, null, 2));
+                        res.setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify({
+                            success: true,
+                            message: `Level created at ${fullPath}`,
+                            path: safePath
+                        }));
+                    } catch (error) {
+                        console.error('Create level error:', error);
+                        res.status(500).setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify({ error: error.message }));
+                    }
+                });
+            });
+
+            // Remove level endpoint
+            devServer.app.post('/api/remove-level', (req, res) => {
+                let body = '';
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+                req.on('end', () => {
+                    try {
+                        const { path: levelPath } = JSON.parse(body);
+                        if (!levelPath) {
+                            throw new Error('path is required');
+                        }
+
+                        const safePath = String(levelPath);
+                        if (safePath.includes("..") || safePath.startsWith("..")) {
+                            throw new Error('Invalid path');
+                        }
+
+                        const fullPath = path.join(__dirname, '../public', safePath);
+                        if (!fs.existsSync(fullPath)) {
+                            res.status(404).setHeader('Content-Type', 'application/json');
+                            res.end(JSON.stringify({ error: `Level not found: ${safePath}` }));
+                            return;
+                        }
+
+                        fs.unlinkSync(fullPath);
+                        res.setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify({
+                            success: true,
+                            message: `Level removed at ${fullPath}`,
+                            path: safePath
+                        }));
+                    } catch (error) {
+                        console.error('Remove level error:', error);
+                        res.status(500).setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify({ error: error.message }));
+                    }
+                });
+            });
+
             // Save entity data endpoint
             devServer.app.post('/api/save-entity-data', (req, res) => {
                 let body = '';

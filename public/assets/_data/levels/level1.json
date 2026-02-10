@@ -1,0 +1,18 @@
+{
+  "name": "level1",
+  "dimensions": {
+    "width": 800,
+    "height": 600
+  },
+  "entitiesByLayer": {
+    "OBJECTS": [
+      {
+        "name": "⚙",
+        "position": {
+          "x": 402,
+          "y": 204
+        }
+      }
+    ]
+  }
+}

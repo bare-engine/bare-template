@@ -21,7 +21,7 @@
     "author": "Jeroen Wimmers",
     "license": "MIT",
     "devDependencies": {
-		"@assetpack/core": "git+https://github.com/BareEngine/Assetpack.git",
+		"@assetpack/core": "^1.7.0",
         "@babel/core": "^7.24.5",
         "@babel/preset-env": "^7.24.5",
         "@types/webpack-env": "^1.18.8",
@@ -47,6 +47,6 @@
         "webpack-merge": "^5.10.0"
     },
     "dependencies": {
-		"bare-engine": "git+ssh://git@github.com/BareEngine/Engine.git"
+		"bare-engine": "file:../BareEngine"
     }
 }

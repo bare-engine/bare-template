@@ -10,8 +10,8 @@ export class Game extends BareGame
         super(entityDataJson);
         
         // UNCOMMENT TO ENABLE PLUGIN
-        //if (__DEV__)
-        //    this.plugin = new BarePlugin();
+        if (__DEV__)
+            this.AddClass(BarePlugin);
     }
 
     OnStart()
