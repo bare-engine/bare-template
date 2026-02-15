@@ -11,6 +11,7 @@ const PreserveComponentPropertiesPlugin = require('./PreserveComponentProperties
 const ComponentParamPreserverPlugin = require('./ComponentParamPreserverPlugin');
 const InjectInitialAssetsPlugin = require("./InjectInitialAssetsPlugin");
 const { EsbuildPlugin } = require("esbuild-loader");
+const { createAwaitRewriteTransformer } = require("./await-transformer");
 
 function ensureDir(dirPath) {
     if (!fs.existsSync(dirPath)) {
@@ -52,10 +53,14 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules[\\/](?!bare-engine)/,
-                loader: "esbuild-loader",
-                options: {
-                    loader: "ts",
-                    target: "es2020"
+                use: {
+                    loader: "ts-loader",
+                    options: {
+                        transpileOnly: true,
+                        getCustomTransformers: () => ({
+                            before: [createAwaitRewriteTransformer()]
+                        })
+                    }
                 }
             },
             {
