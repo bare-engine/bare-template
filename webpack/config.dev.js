@@ -6,7 +6,6 @@ const fs = require("fs");
 const InjectInitialAssetsPlugin = require("./InjectInitialAssetsPlugin");
 const GenerateLayersPlugin = require("./GenerateLayersPlugin");
 const WatchTexturePackImagesPlugin = require("./WatchTexturePackImagesPlugin");
-const { createAwaitRewriteTransformer } = require("./await-transformer");
 
 // Counter for skip reload requests (handles rapid successive saves)
 let skipReloadCount = 0;
@@ -68,15 +67,17 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules[\\/](?!bare-engine)/,
-                use: {
-                    loader: "ts-loader",
-                    options: {
-                        transpileOnly: true,
-                        getCustomTransformers: () => ({
-                            before: [createAwaitRewriteTransformer()]
-                        })
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            transpileOnly: true,
+                            getCustomTransformers: () => ({
+                                before: [createControllerProxyTransformer()]
+                            })
+                        }
                     }
-                }
+                ]
             },
             {
                 test: [/\.vert$/, /\.frag$/],
