@@ -6,6 +6,7 @@ const fs = require("fs");
 const InjectInitialAssetsPlugin = require("./InjectInitialAssetsPlugin");
 const GenerateLayersPlugin = require("./GenerateLayersPlugin");
 const WatchTexturePackImagesPlugin = require("./WatchTexturePackImagesPlugin");
+const createControllerProxyTransformer = require("./controllerProxyTransformer");
 
 // Counter for skip reload requests (handles rapid successive saves)
 let skipReloadCount = 0;
@@ -72,8 +73,8 @@ module.exports = {
                         loader: "ts-loader",
                         options: {
                             transpileOnly: true,
-                            getCustomTransformers: () => ({
-                                before: [createControllerProxyTransformer()]
+                            getCustomTransformers: (program) => ({
+                                before: [createControllerProxyTransformer(program)]
                             })
                         }
                     }

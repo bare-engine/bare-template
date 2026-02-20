@@ -11,6 +11,7 @@ const PreserveComponentPropertiesPlugin = require('./PreserveComponentProperties
 const ComponentParamPreserverPlugin = require('./ComponentParamPreserverPlugin');
 const InjectInitialAssetsPlugin = require("./InjectInitialAssetsPlugin");
 const { EsbuildPlugin } = require("esbuild-loader");
+const createControllerProxyTransformer = require("./controllerProxyTransformer");
 
 function ensureDir(dirPath) {
     if (!fs.existsSync(dirPath)) {
@@ -57,8 +58,8 @@ module.exports = {
                         loader: "ts-loader",
                         options: {
                             transpileOnly: true,
-                            getCustomTransformers: () => ({
-                                before: [createControllerProxyTransformer()]
+                            getCustomTransformers: (program) => ({
+                                before: [createControllerProxyTransformer(program)]
                             })
                         }
                     }
