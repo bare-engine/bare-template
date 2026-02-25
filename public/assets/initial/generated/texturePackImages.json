@@ -1,0 +1,77 @@
+{
+  "frames": {
+    "⚙": {
+      "frame": {
+        "x": 2,
+        "y": 2,
+        "w": 122,
+        "h": 122
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 122,
+        "h": 122
+      },
+      "sourceSize": {
+        "w": 122,
+        "h": 122
+      }
+    },
+    "egg": {
+      "frame": {
+        "x": 126,
+        "y": 2,
+        "w": 102,
+        "h": 143
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 102,
+        "h": 143
+      },
+      "sourceSize": {
+        "w": 102,
+        "h": 143
+      }
+    },
+    "cloudBig": {
+      "frame": {
+        "x": 2,
+        "y": 147,
+        "w": 2048,
+        "h": 2048
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 2048,
+        "h": 2048
+      },
+      "sourceSize": {
+        "w": 2048,
+        "h": 2048
+      }
+    }
+  },
+  "animations": {},
+  "meta": {
+    "app": "http://github.com/pixijs/assetpack",
+    "version": "1.0",
+    "image": "texturePackImages.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2052,
+      "h": 2197
+    },
+    "scale": 1,
+    "related_multi_packs": []
+  }
+}

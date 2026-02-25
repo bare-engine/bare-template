@@ -6,6 +6,28 @@ const externalClassInfoMap = collectClassInfoFromDirs([
     path.resolve(process.cwd(), "../BareEngine/src"),
     path.resolve(process.cwd(), "node_modules/bare-engine/src")
 ]);
+const externalAddClassDirectiveMap = collectAddClassDirectiveMapFromDirs([
+    path.resolve(process.cwd(), "../BareEngine/src"),
+    path.resolve(process.cwd(), "node_modules/bare-engine/src")
+]);
+const externalControllerUsageByClass = collectControllerUsageByClassFromDirs(
+    [
+        path.resolve(process.cwd(), "../BareEngine/src"),
+        path.resolve(process.cwd(), "node_modules/bare-engine/src")
+    ],
+    new Set([
+        "componentController",
+        "hitboxController",
+        "mouseController",
+        "objectController",
+        "particleController",
+        "physicsControllerBare",
+        "physicsControllerSopiro",
+        "tweenController",
+        "cameraHandler",
+        "levelHandler"
+    ])
+);
 
 function createControllerProxyTransformer(program) {
     const registeredAcrossProgram = program
@@ -20,7 +42,7 @@ function createControllerProxyTransformer(program) {
         }
     }
     const typeChecker = program ? program.getTypeChecker() : null;
-    const explicitControllers = new Set([
+    const explicitControllerOrder = [
         "componentController",
         "hitboxController",
         "mouseController",
@@ -31,10 +53,13 @@ function createControllerProxyTransformer(program) {
         "tweenController",
         "cameraHandler",
         "levelHandler"
-    ]);
+    ];
+    const explicitControllers = new Set(explicitControllerOrder);
 
     return (context) => {
         const factory = context.factory || ts;
+        const directiveMap = externalAddClassDirectiveMap || new Map();
+        const externalUsageMap = externalControllerUsageByClass || new Map();
 
         const createThisScene = () =>
             factory.createPropertyAccessExpression(factory.createThis(), "scene");
@@ -47,6 +72,9 @@ function createControllerProxyTransformer(program) {
 
         return (sourceFile) => {
             const registeredControllers = explicitControllers;
+            const isProjectSource = isProjectSourceFile(sourceFile);
+            const startBareTargets = isProjectSource ? collectStartBareTargets(sourceFile) : new Set();
+            const usedControllerClassNames = new Set();
 
             function visit(node) {
                 if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
@@ -56,6 +84,9 @@ function createControllerProxyTransformer(program) {
             }
 
             function transformClass(node) {
+                const className = node.name ? node.name.text : null;
+                const isStartBareTarget = className && startBareTargets.has(className);
+                const usedControllers = isStartBareTarget ? new Set() : null;
                 const hasScene = classHasSceneProperty(node);
                 const extendsScene = classExtendsScene(node);
                 const extendsSceneCarrier = extendsScene
@@ -106,9 +137,28 @@ function createControllerProxyTransformer(program) {
 
                 function visitInClass(n) {
                     if (ts.isCallExpression(n)) {
+                        maybeCollectFromDirectiveMap(n.expression);
                         const updated = maybeTransformTweenToCall(n);
                         if (updated !== n) {
                             return ts.visitEachChild(updated, visitInClass, context);
+                        }
+                    }
+                    if (ts.isPropertyAccessExpression(n)) {
+                        maybeCollectFromDirectiveMap(n);
+                        const propName = n.name && ts.isIdentifier(n.name) ? n.name.text : null;
+                        if (propName && registeredControllers.has(propName)) {
+                            const target = n.expression;
+                            const isThis = ts.isThis(target);
+                            const isThisScene =
+                                ts.isPropertyAccessExpression(target)
+                                && ts.isThis(target.expression)
+                                && target.name.text === "scene";
+
+                            if (isThis || isThisScene) {
+                                if (usedControllers) {
+                                    usedControllers.add(propName);
+                                }
+                            }
                         }
                     }
                     if (ts.isIdentifier(n) && isIdentifierReference(n)) {
@@ -123,29 +173,256 @@ function createControllerProxyTransformer(program) {
                         }
 
                         if (registeredControllers.has(name)) {
+                            if (usedControllers) {
+                                usedControllers.add(name);
+                            }
                             if (extendsScene) {
                                 return createThisProperty(name);
                             }
                             needsScene = true;
                             return createThisSceneProperty(name);
                         }
+
+                        if (usedControllers && isProjectSource) {
+                            const externalControllers = externalUsageMap.get(name);
+                            if (externalControllers && externalControllers.size > 0) {
+                                for (const controllerName of externalControllers) {
+                                    if (registeredControllers.has(controllerName)) {
+                                        usedControllers.add(controllerName);
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     return ts.visitEachChild(n, visitInClass, context);
                 }
 
+                function maybeCollectFromDirectiveMap(expr) {
+                    if (!usedControllers || !isProjectSource) {
+                        return;
+                    }
+                    if (!ts.isPropertyAccessExpression(expr)) {
+                        return;
+                    }
+                    const memberName = expr.name.text;
+                    const directives = directiveMap.get(memberName);
+                    if (!directives || directives.size === 0) {
+                        return;
+                    }
+                    const target = expr.expression;
+                    const isThis = ts.isThis(target);
+                    const isThisScene =
+                        ts.isPropertyAccessExpression(target)
+                        && ts.isThis(target.expression)
+                        && target.name.text === "scene";
+                    if (!isThis && !isThisScene) {
+                        return;
+                    }
+                    for (const className of directives) {
+                        const controllerName = normalizeControllerName(className, registeredControllers);
+                        if (controllerName) {
+                            usedControllers.add(controllerName);
+                        }
+                    }
+                }
+
+                function collectControllerIdentifiersInNode(targetNode) {
+                    const found = new Set();
+
+                    function walk(n) {
+                        if (ts.isIdentifier(n) && isIdentifierReference(n)) {
+                            const name = n.text;
+                            if (registeredControllers.has(name)) {
+                                found.add(name);
+                            }
+                        }
+                        ts.forEachChild(n, walk);
+                    }
+
+                    walk(targetNode);
+                    return found;
+                }
+
+                function transformBlockWithControllerRefs(block) {
+                    const newStatements = [];
+
+                    for (const statement of block.statements) {
+                        const usedInStatement = collectControllerIdentifiersInNode(statement);
+                        if (usedInStatement.size > 0) {
+                            const orderedNames = explicitControllerOrder.filter((name) =>
+                                usedInStatement.has(name)
+                            );
+                            for (const name of orderedNames) {
+                                newStatements.push(
+                                    factory.createExpressionStatement(
+                                        factory.createIdentifier(name)
+                                    )
+                                );
+                            }
+                        }
+
+                        const updatedStatement = ts.visitEachChild(statement, visitInClass, context);
+                        newStatements.push(updatedStatement);
+                    }
+
+                    return factory.updateBlock(block, newStatements);
+                }
+
                 const updatedMembers = node.members.map((member) => {
-                    if (
-                        ts.isConstructorDeclaration(member)
-                        || ts.isMethodDeclaration(member)
-                        || ts.isGetAccessorDeclaration(member)
-                        || ts.isSetAccessorDeclaration(member)
-                        || ts.isPropertyDeclaration(member)
-                    ) {
+                    if (ts.isConstructorDeclaration(member)) {
+                        if (!member.body) {
+                            return member;
+                        }
+                        const updatedBody = transformBlockWithControllerRefs(member.body);
+                        return factory.updateConstructorDeclaration(
+                            member,
+                            member.modifiers,
+                            member.parameters,
+                            updatedBody
+                        );
+                    }
+
+                    if (ts.isMethodDeclaration(member)) {
+                        if (!member.body) {
+                            return member;
+                        }
+                        const updatedBody = transformBlockWithControllerRefs(member.body);
+                        return factory.updateMethodDeclaration(
+                            member,
+                            member.modifiers,
+                            member.asteriskToken,
+                            member.name,
+                            member.questionToken,
+                            member.typeParameters,
+                            member.parameters,
+                            member.type,
+                            updatedBody
+                        );
+                    }
+
+                    if (ts.isGetAccessorDeclaration(member)) {
+                        if (!member.body) {
+                            return member;
+                        }
+                        const updatedBody = transformBlockWithControllerRefs(member.body);
+                        return factory.updateGetAccessorDeclaration(
+                            member,
+                            member.modifiers,
+                            member.name,
+                            member.parameters,
+                            member.type,
+                            updatedBody
+                        );
+                    }
+
+                    if (ts.isSetAccessorDeclaration(member)) {
+                        if (!member.body) {
+                            return member;
+                        }
+                        const updatedBody = transformBlockWithControllerRefs(member.body);
+                        return factory.updateSetAccessorDeclaration(
+                            member,
+                            member.modifiers,
+                            member.name,
+                            member.parameters,
+                            updatedBody
+                        );
+                    }
+
+                    if (ts.isPropertyDeclaration(member)) {
                         return ts.visitEachChild(member, visitInClass, context);
                     }
+
                     return member;
                 });
+
+                let membersWithAddClass = updatedMembers;
+
+                if (usedControllers && usedControllers.size > 0 && isProjectSource) {
+                    const orderedControllerNames = Array.from(explicitControllers)
+                        .filter((name) => usedControllers.has(name));
+                    const controllerClassNames = orderedControllerNames.map((name) => upperFirst(name));
+
+                    if (isStartBareTarget) {
+                        for (const name of controllerClassNames) {
+                            usedControllerClassNames.add(name);
+                        }
+                    }
+                    const existingAddClass = new Set();
+
+                    membersWithAddClass = updatedMembers.map((member) => {
+                        if (!ts.isConstructorDeclaration(member) || !member.body) {
+                            return member;
+                        }
+
+                        for (const statement of member.body.statements) {
+                            if (!ts.isExpressionStatement(statement)) {
+                                continue;
+                            }
+                            const expr = statement.expression;
+                            if (!ts.isCallExpression(expr)) {
+                                continue;
+                            }
+                            if (!ts.isPropertyAccessExpression(expr.expression)) {
+                                continue;
+                            }
+                            const propAccess = expr.expression;
+                            if (
+                                !ts.isThis(propAccess.expression)
+                                || propAccess.name.text !== "AddClass"
+                            ) {
+                                continue;
+                            }
+                            if (expr.arguments.length === 0) {
+                                continue;
+                            }
+                            const arg = expr.arguments[0];
+                            if (ts.isIdentifier(arg)) {
+                                existingAddClass.add(arg.text);
+                            }
+                        }
+
+                        const addStatements = controllerClassNames
+                            .filter((name) => !existingAddClass.has(name))
+                            .map((name) =>
+                                factory.createExpressionStatement(
+                                    factory.createCallExpression(
+                                        factory.createPropertyAccessExpression(
+                                            factory.createThis(),
+                                            "AddClass"
+                                        ),
+                                        undefined,
+                                        [factory.createIdentifier(name)]
+                                    )
+                                )
+                            );
+
+                        if (addStatements.length === 0) {
+                            return member;
+                        }
+
+                        const statements = Array.from(member.body.statements);
+                        const superIndex = statements.findIndex((statement) => {
+                            if (!ts.isExpressionStatement(statement)) {
+                                return false;
+                            }
+                            const expr = statement.expression;
+                            return ts.isCallExpression(expr) && expr.expression.kind === ts.SyntaxKind.SuperKeyword;
+                        });
+
+                        const insertIndex = superIndex >= 0 ? superIndex + 1 : 0;
+                        statements.splice(insertIndex, 0, ...addStatements);
+
+                        return factory.updateConstructorDeclaration(
+                            member,
+                            member.modifiers,
+                            member.parameters,
+                            factory.updateBlock(member.body, statements)
+                        );
+                    });
+
+                }
 
                 const updated = ts.isClassDeclaration(node)
                     ? factory.updateClassDeclaration(
@@ -154,7 +431,7 @@ function createControllerProxyTransformer(program) {
                         node.name,
                         node.typeParameters,
                         node.heritageClauses,
-                        updatedMembers
+                        membersWithAddClass
                     )
                     : factory.updateClassExpression(
                         node,
@@ -162,7 +439,7 @@ function createControllerProxyTransformer(program) {
                         node.name,
                         node.typeParameters,
                         node.heritageClauses,
-                        updatedMembers
+                        membersWithAddClass
                     );
 
                 if (needsScene && !hasScene && !extendsSceneCarrier) {
@@ -175,7 +452,27 @@ function createControllerProxyTransformer(program) {
                 return updated;
             }
 
-            return ts.visitNode(sourceFile, visit);
+            let updatedSourceFile = ts.visitNode(sourceFile, visit);
+
+            if (isProjectSource) {
+                const addClassImports = collectAddClassImports(
+                    updatedSourceFile,
+                    explicitControllers
+                );
+                for (const name of addClassImports) {
+                    usedControllerClassNames.add(name);
+                }
+            }
+
+            if (usedControllerClassNames.size > 0) {
+                updatedSourceFile = addBareEngineImports(
+                    updatedSourceFile,
+                    Array.from(usedControllerClassNames),
+                    factory
+                );
+            }
+
+            return updatedSourceFile;
         };
     };
 }
@@ -308,6 +605,369 @@ function lowerFirst(value) {
         return value;
     }
     return value[0].toLowerCase() + value.slice(1);
+}
+
+function upperFirst(value) {
+    if (!value) {
+        return value;
+    }
+    return value[0].toUpperCase() + value.slice(1);
+}
+
+function collectStartBareTargets(sourceFile) {
+    const targets = new Set();
+
+    function walk(node) {
+        if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+            if (node.expression.text === "StartBare" && node.arguments.length > 0) {
+                const firstArg = node.arguments[0];
+                if (ts.isIdentifier(firstArg)) {
+                    targets.add(firstArg.text);
+                }
+            }
+        }
+        ts.forEachChild(node, walk);
+    }
+
+    walk(sourceFile);
+    return targets;
+}
+
+function isProjectSourceFile(sourceFile) {
+    const filePath = path.resolve(sourceFile.fileName);
+    const projectSrc = path.resolve(process.cwd(), "src");
+    return filePath.startsWith(projectSrc + path.sep);
+}
+
+function collectAddClassImports(sourceFile, controllerNames) {
+    const controllerClassNames = new Set(
+        Array.from(controllerNames).map((name) => upperFirst(name))
+    );
+    const found = new Set();
+
+    function walk(node) {
+        if (ts.isCallExpression(node)) {
+            const expr = node.expression;
+            if (ts.isPropertyAccessExpression(expr)) {
+                if (ts.isThis(expr.expression) && expr.name.text === "AddClass") {
+                    const firstArg = node.arguments[0];
+                    if (firstArg && ts.isIdentifier(firstArg)) {
+                        if (controllerClassNames.has(firstArg.text)) {
+                            found.add(firstArg.text);
+                        }
+                    }
+                }
+            }
+        }
+        ts.forEachChild(node, walk);
+    }
+
+    walk(sourceFile);
+    return found;
+}
+
+function collectAddClassDirectiveMapFromDirs(dirs) {
+    const map = new Map();
+
+    for (const dir of dirs) {
+        if (!dir || !fs.existsSync(dir)) {
+            continue;
+        }
+        const files = listTsFiles(dir);
+        for (const filePath of files) {
+            const sourceText = fs.readFileSync(filePath, "utf8");
+            const sourceFile = ts.createSourceFile(
+                filePath,
+                sourceText,
+                ts.ScriptTarget.Latest,
+                true,
+                ts.ScriptKind.TS
+            );
+
+            ts.forEachChild(sourceFile, (node) => {
+                if (!ts.isClassDeclaration(node)) {
+                    return;
+                }
+                for (const member of node.members) {
+                    if (
+                        !ts.isMethodDeclaration(member)
+                        && !ts.isGetAccessorDeclaration(member)
+                        && !ts.isSetAccessorDeclaration(member)
+                        && !ts.isPropertyDeclaration(member)
+                    ) {
+                        continue;
+                    }
+                    if (!member.name || !ts.isIdentifier(member.name)) {
+                        continue;
+                    }
+                    const directives = collectAddClassDirectivesInNode(sourceText, member);
+                    if (directives.size === 0) {
+                        continue;
+                    }
+                    const name = member.name.text;
+                    const existing = map.get(name) || new Set();
+                    for (const directive of directives) {
+                        existing.add(directive);
+                    }
+                    map.set(name, existing);
+                }
+            });
+        }
+    }
+
+    return map;
+}
+
+function collectControllerUsageByClassFromDirs(dirs, controllerNames) {
+    const map = new Map();
+
+    for (const dir of dirs) {
+        if (!dir || !fs.existsSync(dir)) {
+            continue;
+        }
+        const files = listTsFiles(dir);
+        for (const filePath of files) {
+            const sourceText = fs.readFileSync(filePath, "utf8");
+            const sourceFile = ts.createSourceFile(
+                filePath,
+                sourceText,
+                ts.ScriptTarget.Latest,
+                true,
+                ts.ScriptKind.TS
+            );
+
+            ts.forEachChild(sourceFile, (node) => {
+                if (!ts.isClassDeclaration(node) || !node.name) {
+                    return;
+                }
+                const className = node.name.text;
+                const usedControllers = new Set();
+
+                function walk(n) {
+                    if (ts.isIdentifier(n) && isIdentifierReference(n)) {
+                        const name = n.text;
+                        if (controllerNames.has(name)) {
+                            usedControllers.add(name);
+                        }
+                    }
+                    if (ts.isPropertyAccessExpression(n)) {
+                        const propName = n.name && ts.isIdentifier(n.name) ? n.name.text : null;
+                        if (propName && controllerNames.has(propName)) {
+                            const target = n.expression;
+                            const isThis = ts.isThis(target);
+                            const isThisScene =
+                                ts.isPropertyAccessExpression(target)
+                                && ts.isThis(target.expression)
+                                && target.name.text === "scene";
+                            if (isThis || isThisScene) {
+                                usedControllers.add(propName);
+                            }
+                        }
+                    }
+                    ts.forEachChild(n, walk);
+                }
+
+                for (const member of node.members) {
+                    if (
+                        ts.isConstructorDeclaration(member)
+                        || ts.isMethodDeclaration(member)
+                        || ts.isGetAccessorDeclaration(member)
+                        || ts.isSetAccessorDeclaration(member)
+                        || ts.isPropertyDeclaration(member)
+                    ) {
+                        ts.forEachChild(member, walk);
+                    }
+                }
+
+                if (usedControllers.size > 0) {
+                    map.set(className, usedControllers);
+                }
+            });
+        }
+    }
+
+    return map;
+}
+
+function collectAddClassDirectivesInNode(sourceText, node) {
+    const results = new Set();
+    const nodeText = sourceText.slice(node.pos, node.end);
+    const regex = /@\s*AddClass\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)/g;
+    let match;
+    while ((match = regex.exec(nodeText)) !== null) {
+        results.add(match[1]);
+    }
+    return results;
+}
+
+function normalizeControllerName(value, registeredControllers) {
+    if (!value) {
+        return null;
+    }
+    if (registeredControllers.has(value)) {
+        return value;
+    }
+    const lowered = lowerFirst(value);
+    if (registeredControllers.has(lowered)) {
+        return lowered;
+    }
+    return null;
+}
+
+function addBareEngineImports(sourceFile, names, factory) {
+    if (!names || names.length === 0) {
+        return sourceFile;
+    }
+
+    const specialImportModules = new Map([
+        ["PhysicsControllerSopiro", "bare-engine/sopiroPhysics"],
+        ["PhysicsControllerBare", "bare-engine/barePhysics"]
+    ]);
+
+    const namesByModule = new Map();
+    for (const name of names) {
+        const moduleName = specialImportModules.get(name) || "bare-engine";
+        if (!namesByModule.has(moduleName)) {
+            namesByModule.set(moduleName, new Set());
+        }
+        namesByModule.get(moduleName).add(name);
+    }
+
+    let updatedSourceFile = sourceFile;
+    for (const [moduleName, nameSet] of namesByModule) {
+        updatedSourceFile = addNamedImports(
+            updatedSourceFile,
+            moduleName,
+            Array.from(nameSet),
+            factory
+        );
+    }
+
+    return updatedSourceFile;
+}
+
+function addNamedImports(sourceFile, moduleName, names, factory) {
+    if (!names || names.length === 0) {
+        return sourceFile;
+    }
+
+    const statements = Array.from(sourceFile.statements);
+    const importIndex = statements.findIndex((statement) => {
+        if (!ts.isImportDeclaration(statement)) {
+            return false;
+        }
+        if (!statement.moduleSpecifier || !ts.isStringLiteral(statement.moduleSpecifier)) {
+            return false;
+        }
+        if (statement.moduleSpecifier.text !== moduleName) {
+            return false;
+        }
+        if (!statement.importClause || !statement.importClause.namedBindings) {
+            return false;
+        }
+        return ts.isNamedImports(statement.importClause.namedBindings);
+    });
+
+    const nameSet = new Set(names);
+
+    if (importIndex >= 0) {
+        const importDecl = statements[importIndex];
+        const namedBindings = importDecl.importClause.namedBindings;
+        const existingNames = new Set(
+            namedBindings.elements.map((el) => el.name.text)
+        );
+
+        const toAdd = Array.from(nameSet).filter((name) => !existingNames.has(name));
+        if (toAdd.length === 0) {
+            return sourceFile;
+        }
+
+        const updatedElements = [
+            ...namedBindings.elements,
+            ...toAdd.map((name) => factory.createImportSpecifier(false, undefined, factory.createIdentifier(name)))
+        ];
+
+        const updatedNamedBindings = factory.updateNamedImports(namedBindings, updatedElements);
+        const isTypeOnly = typeof importDecl.importClause.isTypeOnly === "boolean"
+            ? importDecl.importClause.isTypeOnly
+            : false;
+        const updatedImportClause = createImportClauseCompat(
+            factory,
+            isTypeOnly,
+            importDecl.importClause.name,
+            updatedNamedBindings
+        );
+
+        statements[importIndex] = factory.updateImportDeclaration(
+            importDecl,
+            importDecl.modifiers,
+            updatedImportClause,
+            importDecl.moduleSpecifier,
+            importDecl.assertClause
+        );
+
+        return factory.updateSourceFile(sourceFile, statements);
+    }
+
+    const newImport = createImportDeclarationCompat(
+        factory,
+        createImportClauseCompat(
+            factory,
+            false,
+            undefined,
+            factory.createNamedImports(
+                Array.from(nameSet).map((name) =>
+                    factory.createImportSpecifier(false, undefined, factory.createIdentifier(name))
+                )
+            )
+        ),
+        factory.createStringLiteral(moduleName)
+    );
+
+    const insertIndex = statements.findIndex((statement) => !ts.isImportDeclaration(statement));
+    if (insertIndex === -1) {
+        statements.push(newImport);
+    } else {
+        statements.splice(insertIndex, 0, newImport);
+    }
+
+    return factory.updateSourceFile(sourceFile, statements);
+}
+
+function createImportClauseCompat(factory, isTypeOnly, name, namedBindings) {
+    if (typeof factory.createImportClause !== "function") {
+        return undefined;
+    }
+    const argCount = factory.createImportClause.length;
+    if (argCount >= 3) {
+        if (argCount >= 4) {
+            return factory.createImportClause(isTypeOnly, name, namedBindings, undefined);
+        }
+        return factory.createImportClause(isTypeOnly, name, namedBindings);
+    }
+    return factory.createImportClause(name, namedBindings);
+}
+
+function createImportDeclarationCompat(factory, importClause, moduleSpecifier) {
+    if (typeof factory.createImportDeclaration !== "function") {
+        return undefined;
+    }
+    const argCount = factory.createImportDeclaration.length;
+    if (argCount >= 5) {
+        return factory.createImportDeclaration(
+            undefined,
+            undefined,
+            importClause,
+            moduleSpecifier,
+            undefined
+        );
+    }
+    return factory.createImportDeclaration(
+        undefined,
+        importClause,
+        moduleSpecifier,
+        undefined
+    );
 }
 
 function classHasSceneProperty(node) {

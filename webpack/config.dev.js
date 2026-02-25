@@ -4,7 +4,6 @@ const path = require("path");
 const webpack = require("webpack");
 const fs = require("fs");
 const InjectInitialAssetsPlugin = require("./InjectInitialAssetsPlugin");
-const GenerateLayersPlugin = require("./GenerateLayersPlugin");
 const WatchTexturePackImagesPlugin = require("./WatchTexturePackImagesPlugin");
 const createControllerProxyTransformer = require("./controllerProxyTransformer");
 
@@ -12,6 +11,7 @@ const createControllerProxyTransformer = require("./controllerProxyTransformer")
 let skipReloadCount = 0;
 let skipReloadTimeout = null;
 let skipReloadNextOk = false;
+let lastEntityDataPath = "";
 
 function ensureDir(dirPath) {
     if (!fs.existsSync(dirPath)) {
@@ -102,16 +102,16 @@ module.exports = {
 		new webpack.DefinePlugin({
 			__DEV__: JSON.stringify(true)
 		}),
-        new GenerateLayersPlugin(),
         new InjectInitialAssetsPlugin(),
         watchTexturePackImagesPlugin
     ],
     watchOptions: {
         ignored: [
             '**/node_modules/**',
-            '**/public/assets/_data/levels/**',
+            '**/public/assets/data/levels/**',
             '**/dist/**',
-            '**/src/_bareTypes/layer.ts'
+            '**/src/_bareTypes/layer.ts',
+			'**/levels/**' // ADDED JUST FOR DEMO, TO IGNORE EVERY LEVEL FOLDER
         ],
         aggregateTimeout: 100,
         poll: false
@@ -124,9 +124,7 @@ module.exports = {
             directory: path.join(__dirname, '../public'),
             watch: {
                 ignored: [
-                    '**/public/assets/_data/levels/**',
-					'**/levels/**' // ADDED JUST FOR DEMO, TO IGNORE EVERY LEVEL FOLDER
-                    // Note: NOT ignoring _entityData.json here so manual edits trigger reload
+                    '**/public/assets/data/levels/**'
                 ]
             }
         },
@@ -297,7 +295,12 @@ module.exports = {
                             throw new Error('No entityData provided');
                         }
 
-                        const relativePath = customPath || 'assets/_data/_entityData.json';
+                        const fileName = (entityData && typeof entityData === "object" && entityData.name)
+                            ? `${entityData.name}.json`
+                            : "entityData.json";
+                        const relativePath = customPath
+                            ? path.join(customPath, fileName)
+                            : path.join('assets/data', fileName);
                         const fullPath = path.join(__dirname, '../public', relativePath);
                         const dir = path.dirname(fullPath);
                         if (!fs.existsSync(dir)) {
@@ -317,6 +320,9 @@ module.exports = {
                             match => match.replace(/\n\s*/g, ' ').replace('[ ', '[').replace(' ]', ']')
                         );
                         fs.writeFileSync(fullPath, jsonStr);
+
+                        // Track last entity data path for reload suppression.
+                        lastEntityDataPath = relativePath.replace(/\\/g, "/");
 
                         res.setHeader('Content-Type', 'application/json');
                         res.end(JSON.stringify({
@@ -395,9 +401,11 @@ function shouldSkipReload(type, data) {
 }
 
 function isEntityDataChange(data) {
+    const lastPath = lastEntityDataPath;
     const matches = value =>
         typeof value === 'string'
-        && value.replace(/\\/g, "/").includes("assets/_data/_entityData.json");
+        && (value.replace(/\\/g, "/").includes("assets/data/entityData.json")
+            || (lastPath && value.replace(/\\/g, "/").includes(lastPath)));
 
     if (matches(data)) {
         return true;

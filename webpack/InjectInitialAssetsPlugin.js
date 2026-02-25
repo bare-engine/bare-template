@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 class InjectInitialAssetsPlugin {
     apply(compiler) {
-        const watchDir = path.join(__dirname, "../public/assets/_initial");
+        const watchDir = path.join(__dirname, "../public/assets/initial");
         const { RawSource } = compiler.webpack.sources;
 
         compiler.hooks.afterCompile.tap("InjectInitialAssetsPlugin", compilation => {
@@ -21,7 +21,7 @@ class InjectInitialAssetsPlugin {
             this.lastInitialAssetsSignature = signature;
 
             compilation.hooks.fullHash.tap("InjectInitialAssetsPlugin", hash => {
-                const folder = path.join(__dirname, "../public/assets/_initial");
+                const folder = path.join(__dirname, "../public/assets/initial");
                 if (!fs.existsSync(folder)) {
                     return;
                 }
@@ -34,7 +34,7 @@ class InjectInitialAssetsPlugin {
                     hash.update(String(stat.mtimeMs));
                     hash.update(String(stat.size));
                 });
-                console.log(`[InjectInitialAssetsPlugin] Added ${files.length} _initial files to compilation hash`);
+                console.log(`[InjectInitialAssetsPlugin] Added ${files.length} initial files to compilation hash`);
             });
 
             compilation.hooks.processAssets.tap(
@@ -84,7 +84,7 @@ class InjectInitialAssetsPlugin {
     }
 
     getInitialAssetsSignature() {
-        const folder = path.join(__dirname, "../public/assets/_initial");
+        const folder = path.join(__dirname, "../public/assets/initial");
         if (!fs.existsSync(folder)) {
             return "";
         }
@@ -115,14 +115,14 @@ class InjectInitialAssetsPlugin {
             }
         );
 
-        const folder = path.join(__dirname, "../public/assets/_initial");
+        const folder = path.join(__dirname, "../public/assets/initial");
         let tags = "";
 
         if (fs.existsSync(folder)) {
             const files = this.getFilesRecursive(folder);
             files.forEach(filePath => {
                 const relativePath = path.relative(folder, filePath);
-                const url = `./assets/_initial/${relativePath.replace(/\\/g, "/")}`;
+                const url = `./assets/initial/${relativePath.replace(/\\/g, "/")}`;
 
                 if (filePath.endsWith(".js")) {
                     tags += `<script data-initial-asset="true" src="${url}" async onload="this.dataset.loaded='true'" onerror="this.dataset.loaded='true'"></script>\n`;
