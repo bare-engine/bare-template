@@ -89,6 +89,16 @@ function createControllerProxyTransformer(program) {
                 const usedControllers = isStartBareTarget ? new Set() : null;
                 const hasScene = classHasSceneProperty(node);
                 const extendsScene = classExtendsScene(node);
+                const extendsSceneDeep = extendsScene
+                    || (classInfoMap
+                        ? classExtendsSceneInHierarchy(node, classInfoMap)
+                        : false)
+                    || (typeChecker
+                        ? classExtendsSceneInDeclHierarchy(node, typeChecker)
+                        : false)
+                    || (typeChecker
+                        ? classExtendsSceneInTypeHierarchy(node, typeChecker)
+                        : false);
                 const extendsSceneCarrier = extendsScene
                     || (classInfoMap
                         ? classHasSceneInHierarchy(node, classInfoMap)
@@ -102,7 +112,7 @@ function createControllerProxyTransformer(program) {
                 let needsScene = false;
 
                 const createTweenToSceneArg = () =>
-                    extendsScene ? factory.createThis() : createThisScene();
+                    extendsSceneDeep ? factory.createThis() : createThisScene();
 
                 function maybeTransformTweenToCall(callNode) {
                     if (!ts.isIdentifier(callNode.expression)) {
@@ -121,7 +131,7 @@ function createControllerProxyTransformer(program) {
                         args.push(factory.createTrue());
                     }
                     if (args.length < 5) {
-                        if (!extendsScene) {
+                        if (!extendsSceneDeep) {
                             needsScene = true;
                         }
                         args.push(createTweenToSceneArg());
@@ -165,18 +175,26 @@ function createControllerProxyTransformer(program) {
                         const name = n.text;
 
                         if (name === "bare") {
-                            if (extendsScene) {
-                                return factory.createThis();
+                        if (extendsSceneDeep) {
+                            return factory.createThis();
+                        }
+                        needsScene = true;
+                        return createThisScene();
+                        }
+
+                        if (name === "events") {
+                            if (extendsSceneDeep) {
+                                return createThisProperty(name);
                             }
                             needsScene = true;
-                            return createThisScene();
+                            return createThisSceneProperty(name);
                         }
 
                         if (registeredControllers.has(name)) {
                             if (usedControllers) {
                                 usedControllers.add(name);
                             }
-                            if (extendsScene) {
+                            if (extendsSceneDeep) {
                                 return createThisProperty(name);
                             }
                             needsScene = true;
@@ -1065,12 +1083,44 @@ function classHasSceneInHierarchy(node, classInfoMap) {
         }
         visited.add(baseName);
 
+        if (baseName === "Scene") {
+            return true;
+        }
+
         const info = classInfoMap.get(baseName);
         if (!info) {
             return false;
         }
         if (info.hasScene) {
             return true;
+        }
+        return info.bases.some(walk);
+    }
+
+    return bases.some(walk);
+}
+
+function classExtendsSceneInHierarchy(node, classInfoMap) {
+    const bases = getBaseClassNames(node);
+    if (bases.length === 0) {
+        return false;
+    }
+
+    const visited = new Set();
+
+    function walk(baseName) {
+        if (!baseName || visited.has(baseName)) {
+            return false;
+        }
+        visited.add(baseName);
+
+        if (baseName === "Scene") {
+            return true;
+        }
+
+        const info = classInfoMap.get(baseName);
+        if (!info) {
+            return false;
         }
         return info.bases.some(walk);
     }
@@ -1087,7 +1137,68 @@ function classHasSceneInDeclHierarchy(node, checker) {
         }
         visited.add(decl);
 
+        if (decl.name && decl.name.text === "Scene") {
+            return true;
+        }
+
+        if (classExtendsScene(decl)) {
+            return true;
+        }
+
         if (classHasSceneProperty(decl)) {
+            return true;
+        }
+
+        const bases = decl.heritageClauses
+            ? decl.heritageClauses
+                .filter((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword)
+                .flatMap((clause) => clause.types)
+            : [];
+
+        for (const baseType of bases) {
+            const baseDecls = resolveClassDeclarationsFromType(baseType, checker);
+            for (const baseDecl of baseDecls) {
+                if (walkDeclaration(baseDecl)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    const baseTypes = node.heritageClauses
+        ? node.heritageClauses
+            .filter((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword)
+            .flatMap((clause) => clause.types)
+        : [];
+
+    for (const baseType of baseTypes) {
+        const baseDecls = resolveClassDeclarationsFromType(baseType, checker);
+        for (const baseDecl of baseDecls) {
+            if (walkDeclaration(baseDecl)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+function classExtendsSceneInDeclHierarchy(node, checker) {
+    const visited = new Set();
+
+    function walkDeclaration(decl) {
+        if (!decl || visited.has(decl)) {
+            return false;
+        }
+        visited.add(decl);
+
+        if (decl.name && decl.name.text === "Scene") {
+            return true;
+        }
+
+        if (classExtendsScene(decl)) {
             return true;
         }
 
@@ -1199,9 +1310,40 @@ function classHasSceneInTypeHierarchy(node, checker) {
     return walkType(classType);
 }
 
+function classExtendsSceneInTypeHierarchy(node, checker) {
+    const visited = new Set();
+
+    function walkType(type) {
+        if (!type || visited.has(type)) {
+            return false;
+        }
+        visited.add(type);
+
+        if (type.symbol && type.symbol.name === "Scene") {
+            return true;
+        }
+
+        const baseTypes = type.getBaseTypes ? type.getBaseTypes() : [];
+        for (const baseType of baseTypes || []) {
+            if (walkType(baseType)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    const classType = checker.getTypeAtLocation(node);
+    return walkType(classType);
+}
+
 function typeHasSceneProperty(type, checker) {
     if (!type) {
         return false;
+    }
+
+    if (type.symbol && type.symbol.name === "Scene") {
+        return true;
     }
 
     const sceneProp = type.getProperty("scene");
