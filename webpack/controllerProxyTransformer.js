@@ -2,9 +2,23 @@ const ts = require("typescript");
 const fs = require("fs");
 const path = require("path");
 
+const allControllerNames = new Set([
+    "componentController",
+    "hitboxController",
+    "mouseController",
+    "objectController",
+    "particleController",
+    "physicsControllerBare",
+    "physicsControllerSopiro",
+    "tweenController",
+    "cameraHandler",
+    "levelHandler",
+]);
+
 const externalClassInfoMap = collectClassInfoFromDirs([
     path.resolve(process.cwd(), "../BareEngine/src"),
-    path.resolve(process.cwd(), "node_modules/bare-engine/src")
+    path.resolve(process.cwd(), "node_modules/bare-engine/src"),
+    path.resolve(process.cwd(), "src")
 ]);
 const externalAddClassDirectiveMap = collectAddClassDirectiveMapFromDirs([
     path.resolve(process.cwd(), "../BareEngine/src"),
@@ -15,18 +29,7 @@ const externalControllerUsageByClass = collectControllerUsageByClassFromDirs(
         path.resolve(process.cwd(), "../BareEngine/src"),
         path.resolve(process.cwd(), "node_modules/bare-engine/src")
     ],
-    new Set([
-        "componentController",
-        "hitboxController",
-        "mouseController",
-        "objectController",
-        "particleController",
-        "physicsControllerBare",
-        "physicsControllerSopiro",
-        "tweenController",
-        "cameraHandler",
-        "levelHandler"
-    ])
+    allControllerNames
 );
 
 function createControllerProxyTransformer(program) {
@@ -42,19 +45,9 @@ function createControllerProxyTransformer(program) {
         }
     }
     const typeChecker = program ? program.getTypeChecker() : null;
-    const explicitControllerOrder = [
-        "componentController",
-        "hitboxController",
-        "mouseController",
-        "objectController",
-        "particleController",
-        "physicsControllerBare",
-        "physicsControllerSopiro",
-        "tweenController",
-        "cameraHandler",
-        "levelHandler"
-    ];
-    const explicitControllers = new Set(explicitControllerOrder);
+    const explicitControllerOrder = Array.from(allControllerNames);
+    const explicitControllers = allControllerNames;
+
 
     return (context) => {
         const factory = context.factory || ts;
@@ -76,9 +69,59 @@ function createControllerProxyTransformer(program) {
             const startBareTargets = isProjectSource ? collectStartBareTargets(sourceFile) : new Set();
             const usedControllerClassNames = new Set();
 
+            function maybeTransformTweenToCallTopLevel(callNode) {
+                if (!ts.isCallExpression(callNode)) {
+                    return callNode;
+                }
+                if (!ts.isIdentifier(callNode.expression)) {
+                    return callNode;
+                }
+                if (callNode.expression.text !== "TweenTo") {
+                    return callNode;
+                }
+                const firstArg = callNode.arguments[0];
+                if (!firstArg) {
+                    return callNode;
+                }
+                if (typeChecker) {
+                    const argType = typeChecker.getTypeAtLocation(firstArg);
+                    if (argType && argType.getProperty("scene")) {
+                        const tweenControllerAccess = factory.createPropertyAccessExpression(
+                            factory.createPropertyAccessExpression(firstArg, "scene"),
+                            "tweenController"
+                        );
+                        const newCallee = factory.createPropertyAccessExpression(
+                            tweenControllerAccess,
+                            "TweenTo"
+                        );
+                        return factory.updateCallExpression(
+                            callNode,
+                            newCallee,
+                            callNode.typeArguments,
+                            callNode.arguments
+                        );
+                    }
+                }
+                return callNode;
+            }
+
             function visit(node) {
                 if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
                     return transformClass(node);
+                }
+                if (ts.isCallExpression(node)) {
+                    const updated = maybeTransformTweenToCallTopLevel(node);
+                    if (updated !== node) {
+                        const visitedArgs = updated.arguments.map(
+                            (arg) => ts.visitNode(arg, visit)
+                        );
+                        return factory.updateCallExpression(
+                            updated,
+                            updated.expression,
+                            updated.typeArguments,
+                            visitedArgs
+                        );
+                    }
                 }
                 return ts.visitEachChild(node, visit, context);
             }
@@ -111,9 +154,6 @@ function createControllerProxyTransformer(program) {
                         : false);
                 let needsScene = false;
 
-                const createTweenToSceneArg = () =>
-                    extendsSceneDeep ? factory.createThis() : createThisScene();
-
                 function maybeTransformTweenToCall(callNode) {
                     if (!ts.isIdentifier(callNode.expression)) {
                         return callNode;
@@ -122,26 +162,54 @@ function createControllerProxyTransformer(program) {
                         return callNode;
                     }
 
-                    const args = callNode.arguments.slice();
+                    const firstArg = callNode.arguments[0];
+                    if (!firstArg) {
+                        return callNode;
+                    }
 
-                    if (args.length < 3) {
-                        args.push(factory.createObjectLiteralExpression());
-                    }
-                    if (args.length < 4) {
-                        args.push(factory.createTrue());
-                    }
-                    if (args.length < 5) {
-                        if (!extendsSceneDeep) {
-                            needsScene = true;
+                    const firstArgIsController = ts.isIdentifier(firstArg)
+                        && registeredControllers.has(firstArg.text);
+
+                    let hasScene = false;
+                    if (!firstArgIsController && typeChecker) {
+                        const argType = typeChecker.getTypeAtLocation(firstArg);
+                        if (argType && argType.getProperty("scene")) {
+                            hasScene = true;
                         }
-                        args.push(createTweenToSceneArg());
                     }
+
+                    let tweenControllerAccess;
+                    if (hasScene) {
+                        // firstArg.scene.tweenController
+                        tweenControllerAccess = factory.createPropertyAccessExpression(
+                            factory.createPropertyAccessExpression(firstArg, "scene"),
+                            "tweenController"
+                        );
+                    } else if (extendsSceneDeep) {
+                        // this.tweenController
+                        tweenControllerAccess = factory.createPropertyAccessExpression(
+                            factory.createThis(),
+                            "tweenController"
+                        );
+                    } else {
+                        // this.scene.tweenController
+                        needsScene = true;
+                        tweenControllerAccess = factory.createPropertyAccessExpression(
+                            createThisScene(),
+                            "tweenController"
+                        );
+                    }
+
+                    const newCallee = factory.createPropertyAccessExpression(
+                        tweenControllerAccess,
+                        "TweenTo"
+                    );
 
                     return factory.updateCallExpression(
                         callNode,
-                        callNode.expression,
+                        newCallee,
                         callNode.typeArguments,
-                        args
+                        callNode.arguments
                     );
                 }
 
@@ -150,7 +218,16 @@ function createControllerProxyTransformer(program) {
                         maybeCollectFromDirectiveMap(n.expression);
                         const updated = maybeTransformTweenToCall(n);
                         if (updated !== n) {
-                            return ts.visitEachChild(updated, visitInClass, context);
+                            // Only visit the arguments, not the callee (which we just created)
+                            const visitedArgs = updated.arguments.map(
+                                (arg) => ts.visitNode(arg, visitInClass)
+                            );
+                            return factory.updateCallExpression(
+                                updated,
+                                updated.expression,
+                                updated.typeArguments,
+                                visitedArgs
+                            );
                         }
                     }
                     if (ts.isPropertyAccessExpression(n)) {
@@ -173,21 +250,26 @@ function createControllerProxyTransformer(program) {
                     }
                     if (ts.isIdentifier(n) && isIdentifierReference(n)) {
                         const name = n.text;
+                        const canRewriteScene = extendsSceneDeep || hasScene || extendsSceneCarrier;
 
                         if (name === "bare") {
                         if (extendsSceneDeep) {
                             return factory.createThis();
                         }
-                        needsScene = true;
-                        return createThisScene();
+                        if (canRewriteScene) {
+                            needsScene = true;
+                            return createThisScene();
+                        }
                         }
 
                         if (name === "events") {
                             if (extendsSceneDeep) {
                                 return createThisProperty(name);
                             }
-                            needsScene = true;
-                            return createThisSceneProperty(name);
+                            if (canRewriteScene) {
+                                needsScene = true;
+                                return createThisSceneProperty(name);
+                            }
                         }
 
                         if (registeredControllers.has(name)) {
@@ -197,8 +279,10 @@ function createControllerProxyTransformer(program) {
                             if (extendsSceneDeep) {
                                 return createThisProperty(name);
                             }
-                            needsScene = true;
-                            return createThisSceneProperty(name);
+                            if (canRewriteScene) {
+                                needsScene = true;
+                                return createThisSceneProperty(name);
+                            }
                         }
 
                         if (usedControllers && isProjectSource) {
@@ -245,40 +329,24 @@ function createControllerProxyTransformer(program) {
                     }
                 }
 
-                function collectControllerIdentifiersInNode(targetNode) {
-                    const found = new Set();
-
-                    function walk(n) {
-                        if (ts.isIdentifier(n) && isIdentifierReference(n)) {
-                            const name = n.text;
-                            if (registeredControllers.has(name)) {
-                                found.add(name);
-                            }
-                        }
-                        ts.forEachChild(n, walk);
-                    }
-
-                    walk(targetNode);
-                    return found;
-                }
-
                 function transformBlockWithControllerRefs(block) {
                     const newStatements = [];
+                    const introducedControllers = new Set();
 
                     for (const statement of block.statements) {
-                        const usedInStatement = collectControllerIdentifiersInNode(statement);
-                        if (usedInStatement.size > 0) {
-                            const orderedNames = explicitControllerOrder.filter((name) =>
-                                usedInStatement.has(name)
-                            );
-                            for (const name of orderedNames) {
-                                newStatements.push(
-                                    factory.createExpressionStatement(
-                                        factory.createIdentifier(name)
-                                    )
-                                );
+                        // Scan for controller refs in this statement before rewriting
+                        function scanControllers(n) {
+                            if (ts.isIdentifier(n) && isIdentifierReference(n) && registeredControllers.has(n.text)) {
+                                if (!introducedControllers.has(n.text)) {
+                                    introducedControllers.add(n.text);
+                                    newStatements.push(
+                                        factory.createExpressionStatement(factory.createIdentifier(n.text))
+                                    );
+                                }
                             }
+                            ts.forEachChild(n, scanControllers);
                         }
+                        scanControllers(statement);
 
                         const updatedStatement = ts.visitEachChild(statement, visitInClass, context);
                         newStatements.push(updatedStatement);
@@ -355,91 +423,12 @@ function createControllerProxyTransformer(program) {
                     return member;
                 });
 
-                let membersWithAddClass = updatedMembers;
-
-                if (usedControllers && usedControllers.size > 0 && isProjectSource) {
+                if (usedControllers && usedControllers.size > 0 && isProjectSource && isStartBareTarget) {
                     const orderedControllerNames = Array.from(explicitControllers)
                         .filter((name) => usedControllers.has(name));
-                    const controllerClassNames = orderedControllerNames.map((name) => upperFirst(name));
-
-                    if (isStartBareTarget) {
-                        for (const name of controllerClassNames) {
-                            usedControllerClassNames.add(name);
-                        }
+                    for (const name of orderedControllerNames.map((name) => upperFirst(name))) {
+                        usedControllerClassNames.add(name);
                     }
-                    const existingAddClass = new Set();
-
-                    membersWithAddClass = updatedMembers.map((member) => {
-                        if (!ts.isConstructorDeclaration(member) || !member.body) {
-                            return member;
-                        }
-
-                        for (const statement of member.body.statements) {
-                            if (!ts.isExpressionStatement(statement)) {
-                                continue;
-                            }
-                            const expr = statement.expression;
-                            if (!ts.isCallExpression(expr)) {
-                                continue;
-                            }
-                            if (!ts.isPropertyAccessExpression(expr.expression)) {
-                                continue;
-                            }
-                            const propAccess = expr.expression;
-                            if (
-                                !ts.isThis(propAccess.expression)
-                                || propAccess.name.text !== "AddClass"
-                            ) {
-                                continue;
-                            }
-                            if (expr.arguments.length === 0) {
-                                continue;
-                            }
-                            const arg = expr.arguments[0];
-                            if (ts.isIdentifier(arg)) {
-                                existingAddClass.add(arg.text);
-                            }
-                        }
-
-                        const addStatements = controllerClassNames
-                            .filter((name) => !existingAddClass.has(name))
-                            .map((name) =>
-                                factory.createExpressionStatement(
-                                    factory.createCallExpression(
-                                        factory.createPropertyAccessExpression(
-                                            factory.createThis(),
-                                            "AddClass"
-                                        ),
-                                        undefined,
-                                        [factory.createIdentifier(name)]
-                                    )
-                                )
-                            );
-
-                        if (addStatements.length === 0) {
-                            return member;
-                        }
-
-                        const statements = Array.from(member.body.statements);
-                        const superIndex = statements.findIndex((statement) => {
-                            if (!ts.isExpressionStatement(statement)) {
-                                return false;
-                            }
-                            const expr = statement.expression;
-                            return ts.isCallExpression(expr) && expr.expression.kind === ts.SyntaxKind.SuperKeyword;
-                        });
-
-                        const insertIndex = superIndex >= 0 ? superIndex + 1 : 0;
-                        statements.splice(insertIndex, 0, ...addStatements);
-
-                        return factory.updateConstructorDeclaration(
-                            member,
-                            member.modifiers,
-                            member.parameters,
-                            factory.updateBlock(member.body, statements)
-                        );
-                    });
-
                 }
 
                 const updated = ts.isClassDeclaration(node)
@@ -449,7 +438,7 @@ function createControllerProxyTransformer(program) {
                         node.name,
                         node.typeParameters,
                         node.heritageClauses,
-                        membersWithAddClass
+                        updatedMembers
                     )
                     : factory.updateClassExpression(
                         node,
@@ -457,7 +446,7 @@ function createControllerProxyTransformer(program) {
                         node.name,
                         node.typeParameters,
                         node.heritageClauses,
-                        membersWithAddClass
+                        updatedMembers
                     );
 
                 if (needsScene && !hasScene && !extendsSceneCarrier) {

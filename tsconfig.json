@@ -4,7 +4,10 @@
         "module": "ESNext",
         "outDir": "./dist/",
         "moduleResolution": "bundler",
-        "baseUrl": "./src"
+        "baseUrl": "./src",
+        "resolveJsonModule": true,
+        "lib": ["ES2020", "DOM"],
+        "experimentalDecorators": true
     },
     "include": [
         "src"
