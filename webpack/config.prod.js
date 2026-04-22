@@ -92,7 +92,7 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            template: "./index.html",
+            template: "./public/index.html",
             inject: false,
             minify: false
         }),

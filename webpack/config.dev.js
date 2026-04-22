@@ -97,7 +97,7 @@ module.exports = {
             cleanOnceBeforeBuildPatterns: [path.join(__dirname, "dist/**/*")]
         }),
         new HtmlWebpackPlugin({
-            template: "./index.html",
+            template: "./public/index.html",
             scriptLoading: "blocking",
             inject: 'head'
         }),
