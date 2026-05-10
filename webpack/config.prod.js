@@ -13,16 +13,6 @@ const { EsbuildPlugin } = require("esbuild-loader");
 const createControllerProxyTransformer = require("./controllerProxyTransformer");
 const createGameObjectNameTransformer = require("./gameObjectNameTransformer");
 
-function ensureDir(dirPath) {
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
-    }
-}
-
-[
-    path.join(__dirname, "../src/components"),
-    path.join(__dirname, "../src/editorComponents")
-].forEach(ensureDir);
 
 module.exports = {
     mode: "production",
@@ -109,7 +99,7 @@ module.exports = {
 		}),
         new InjectInitialAssetsPlugin(),
         new CopyPlugin({
-            patterns: [{ from: "public", to: "" }]
+            patterns: [{ from: "public", to: "", globOptions: { ignore: ["**/index.html"] } }]
         }),
         new (class {
             apply(compiler) {

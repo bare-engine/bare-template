@@ -200,7 +200,9 @@
             var end = link.split('/').pop();
             return end;
       })
-      console.log("Initial assets found: ", assetsLinkValue);
+      
+      if (assetsLinkValue.length > 0)
+        console.log("Initial assets found: ", assetsLinkValue);
 
       var readyFired = false;
 
@@ -213,7 +215,7 @@
 
           assets.forEach(function(asset) {
               var url = asset.src || asset.href;
-              var fileName = url.split('/').pop();
+              var fileName = decodeURIComponent(url.split('/').pop());
 
               assetsObj[fileName] = asset;
 

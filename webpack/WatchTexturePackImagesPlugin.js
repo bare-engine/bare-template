@@ -5,7 +5,7 @@ const { spawn } = require("child_process");
 class WatchTexturePackImagesPlugin {
     constructor(options = {}) {
         this.watchDir = options.watchDir;
-        this.reloadPath = options.reloadPath || "/assets/_initial";
+        this.reloadPath = options.reloadPath || "/assets/initial";
         this.buildCommand = options.buildCommand || ["npm", "run", "build:assets"];
         this.buildCwd = options.buildCwd || process.cwd();
         this.debounceMs = options.debounceMs ?? 200;
@@ -141,7 +141,7 @@ class WatchTexturePackImagesPlugin {
     isInitialAssetsChange(data) {
         const matches = value =>
             typeof value === "string"
-            && value.replace(/\\/g, "/").includes("assets/_initial");
+            && value.replace(/\\/g, "/").includes("assets/initial");
 
         if (matches(data)) {
             return true;

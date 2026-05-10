@@ -1,4 +1,4 @@
-import { BarePlugin, GameObject, Scene, StartBare } from 'bare-engine';
+import { Color, GameObject, RenderTexture, Scene, StartBare, TextObject, Vec2 } from 'bare-engine';
 import settingsDataJson from '../public/assets/data/settingsData.json';
 
 export class Game extends Scene
@@ -8,10 +8,6 @@ export class Game extends Scene
     constructor()
     {
         super(settingsDataJson);
-        
-        // UNCOMMENT TO ENABLE PLUGIN
-        if (__DEV__)
-            this.AddClass(BarePlugin);
     }
 
     OnStart()
