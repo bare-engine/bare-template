@@ -4,13 +4,13 @@
     "scripts": {
         "generate:layers": "node webpack/generate-layers.js",
         "generate:layers:watch": "node webpack/generate-layers.js --watch",
-        "dev": "webpack-dev-server --config webpack/config.dev.js",
-        "dev:open": "webpack-dev-server --config webpack/config.dev.js --open",
-        "build": "webpack --config webpack/config.prod.js",
+        "dev": "webpack-dev-server --config webpack.config.js --mode development",
+        "dev:open": "webpack-dev-server --config webpack.config.js --mode development --open",
+        "build": "webpack --config webpack.config.js --mode production",
         "build-zip": "npm run build && cd dist && bestzip ../dist.zip *",
-        "dev-nolog": "webpack-dev-server --config webpack/config.dev.js --open",
-        "build-nolog": "npm run generate:layers && webpack --config webpack/config.prod.js",
-        "analyze": "webpack --config webpack/config.prod.js --env analyze --json=stats.json && webpack-bundle-analyzer stats.json",
+        "dev-nolog": "webpack-dev-server --config webpack.config.js --mode development --open",
+        "build-nolog": "npm run generate:layers && webpack --config webpack.config.js --mode production",
+        "analyze": "webpack --config webpack.config.js --mode production --env analyze --json=stats.json && webpack-bundle-analyzer stats.json",
         "poki-upload": "poki upload",
         "build:assets": "assetpack --config assetpack.config.mjs"
     },
@@ -50,3 +50,5 @@
 		"bare-engine": "file:../BareEngine"
     }
 }
+
+
