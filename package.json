@@ -8,7 +8,7 @@
         "build-zip": "npm run build && cd dist && bestzip ../dist.zip *",
         "dev-nolog": "vite --config vite.config.cjs --mode development --open",
         "build-nolog": "vite build --config vite.config.cjs --mode production",
-        "analyze": "vite build --config vite.config.cjs --mode production",
+        "analyze": "bare-engine-analyze",
         "poki-upload": "poki upload",
         "build:assets": "assetpack --config assetpack.config.mjs"
     },
