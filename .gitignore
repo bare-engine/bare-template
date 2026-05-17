@@ -28,7 +28,8 @@ dist/
 .idea/
 
 # VS Code
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # AssetPack
 .assetpack/
@@ -58,3 +59,4 @@ Thumbs.db
 webpack/.webpack_cache/
 stats.json
 dist.zip
+
