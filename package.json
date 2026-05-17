@@ -10,7 +10,7 @@
         "build-nolog": "vite build --config vite.config.cjs --mode production",
         "analyze": "bare-engine-analyze",
         "poki-upload": "poki upload",
-        "build:assets": "assetpack --config assetpack.config.mjs"
+        "build:assets": "node node_modules/bare-engine/scripts/buildAssets.cjs"
     },
     "repository": {
         "type": "git",
@@ -36,4 +36,3 @@
         }
     }
 }
-
