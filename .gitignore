@@ -6,7 +6,7 @@
 # Node artifact files
 node_modules/
 dist/
-public/assets/initial/generated/
+public/initial/generated/
 
 # Compiled Java class files
 *.class

@@ -57,7 +57,7 @@ const movePackedFromParent = () => ({
 
 export default {
   entry: "./texturePackImages",
-  output: "./public/assets/initial/generated",
+  output: "./public/initial/generated",
   cache: false,
   ignore: ["*.png", "**/*"], // ignore all files/folders
   pipes: [

@@ -1,5 +1,5 @@
 import { GameObject, Scene, StartBare } from 'bare-engine';
-import settingsDataJson from '../public/assets/data/settingsData.json';
+import settingsDataJson from '../public/data/settingsData.json';
 
 export class Game extends Scene
 {
