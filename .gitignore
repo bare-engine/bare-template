@@ -30,6 +30,9 @@ dist/
 # VS Code
 .vscode/
 
+# AssetPack
+.assetpack/
+
 # Unit test reports
 TEST*.xml
 
