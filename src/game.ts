@@ -23,4 +23,4 @@ export class Game extends Scene
     }
 }
 
-StartBare(Game, {antiAlias: true});
+StartBare(Game);
