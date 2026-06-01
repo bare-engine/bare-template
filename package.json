@@ -1,5 +1,5 @@
 {
-    "name": "template-bare",
+    "name": "Bare Game",
     "version": "1.2.1",
     "scripts": {
         "dev": "vite --config vite.config.cjs --mode development",
