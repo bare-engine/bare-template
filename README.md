@@ -1,4 +1,4 @@
-<h1>Bare-Template</h1>
+<h1>Bare Template</h1>
 The starting point for a new project.
 
 <br>
@@ -6,56 +6,120 @@ The starting point for a new project.
 
 <h2>Getting Started</h2>
 
-<p>Install Node.js first</p>
+<p>Install Node.js first.</p>
 
 <pre><code>https://nodejs.org</code></pre>
 
+Click <b>Use this template</b> in the top right. Create the repo.
 <p>Then</p>
-<pre><code>git clone https://github.com/bare-engine/bare-template.git my-game
+<pre><code>git clone https://github.com/PATH-TO-YOUR-REPO.git my-game
 cd my-game
 npm install
 npm run dev</code></pre>
 
 Open the URL shown in the terminal to start developing.
-<br><br>
+<p>An npm create command will be there in the future to make this process easier.</p>
+<br>
+
 <h2>Getting Going</h2>
 <ol>
-    <li><a href="https://github.com/bare-engine/bare-template](https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb)">Chrome Extension</a> - Get the extension</li>
+    <li><a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb">Chrome Extension</a> - Get the extension</li>
     <li><a href="https://github.com/bare-engine/bare-showcase">Bare Showcase</a> - Explore the engine's features</li>
     <li><a href="https://github.com/bare-engine/bare-demos">Bare Demos</a> - Explore game examples</li>
 </ol>
 <br>
-<h2>Going Around</h2>
-<b>texturePackImages/</b> - This folder currently contains one image: ⚙️. While the vite server is running, you can add your own images to this folder and it will automatically turn these into an atlas, placing it in public/initial/generated/. 
+
+<h2>Getting Around</h2>
+<b>texturePackImages/</b> - This folder currently contains one image: ⚙️. While the Vite server is running, you can add your own images to this folder, and it will automatically turn them into an atlas, placing it in public/initial/generated/.
 <br><br>
+
 <b>public/initial/</b> - Anything under this folder will get loaded before your game runs. You can learn more about it in <a href="https://github.com/bare-engine/bare-showcase/blob/main/public/demos/imageLoading/src/DemoImageLoading.ts">DemoImageLoading</a> of the showcase project.
 <br><br>
-<b>public/data/settingsData.json</b> - This is the heart of the project, all your game data and configuration will live here. Currently it's empty, but you can get a better idea by looking the <a href="https://github.com/bare-engine/bare-shmup/blob/main/public/data/settingsData.json">settingsData</a> from the <a href="https://github.com/bare-engine/bare-shmup">bare-shmup</a> example. While you can edit this by hand, the <a href="https://github.com/bare-engine/bare-template](https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb)">Chrome Extension</a> is there to help you interface with it.
-<br><br>
-<b>public/images/</b> - This is where you place your images (.webp) to be streamed in. Once again, <a href="https://github.com/bare-engine/bare-showcase/blob/main/public/demos/imageLoading/src/DemoImageLoading.ts">DemoImageLoading.ts</a> gives a good insight. You could put a ⚙️ png here, remove it from the texturePackImages folder, and it would automatically get streamed in. No changes to the code needed. You can see <a href="https://github.com/bare-engine/bare-platformer">platformer</a> for an example where everything gets streamed in, even animations.
 
+<b>public/data/settingsData.json</b> - This is the heart of the project. All your game data and configuration will live here. Currently, it's empty, but you can get a better idea by looking at the <a href="https://github.com/bare-engine/bare-shmup/blob/main/public/data/settingsData.json">settingsData</a> from the <a href="https://github.com/bare-engine/bare-shmup">bare-shmup</a> example. While you can edit this by hand, the <a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb">Chrome Extension</a> is there to help you interface with it.
 <br><br>
-<b>src/game.ts</b> - The starting point of the code. It start with `StartBare(Game);` instantiating the class. This class has to extend the engine class `Scene`. We supply it the settingsData.json mentioned before in super to let this scene use the data we provided there (currently none). `this.AddGameObject('⚙')` will first try to resolve the '⚙': first it will try to find an entity of the matching name, then an image in the initial assets (where it finds it), and then it will look in public/images/ to stream in it in. After that, it creates a GameObject and adds it to the scene.
+
+<b>public/images/</b> - This is where you place your images (.webp) to be streamed in. Once again, <a href="https://github.com/bare-engine/bare-showcase/blob/main/public/demos/imageLoading/src/DemoImageLoading.ts">DemoImageLoading.ts</a> gives a good insight. You could put a ⚙️ png here, remove it from the texturePackImages folder, and it would automatically get streamed in. No changes to the code needed. You can see <a href="https://github.com/bare-engine/bare-platformer">platformer</a> for an example where everything gets streamed in, even animations.
 <br><br>
-<b>src/components/</b> - Currently empty, but this is where you would place your ...Component.ts files. All game example use these, but <a href="https://github.com/bare-engine/bare-platformer">platformer</a> is a good reference - <a href="https://github.com/bare-engine/bare-platformer/blob/main/src/components/playerComponent.ts)">playerComponent.ts</a>.
+
+<b>src/game.ts</b> - The starting point of the code. It starts with <code>StartBare(Game);</code>, instantiating the class. This class has to extend the engine class <code>Scene</code>. We supply it with the settingsData.json mentioned before in <code>super</code> to let this scene use the data we provided there (currently none). <code>this.AddGameObject('⚙')</code> will first try to resolve the '⚙': first, it will try to find an entity of the matching name, then an image in the initial assets (where it finds it), and then it will look in public/images/ to stream it in. After that, it creates a GameObject and adds it to the scene.
 <br><br>
-<b>src/generated/</b> - Vite has generated assets.ts in here. This file is not for editing. It gives you code access to your asset files. For example, you could call `this.AddGameObject(Asset.Image.EMOJI_GEAR)`. Any image file used in the project can be found under Asset.Image.xxx, giving you a nice auto-complete.
+
+<b>src/components/</b> - Currently empty, but this is where you would place your ...Component.ts files. All game examples use these, but <a href="https://github.com/bare-engine/bare-platformer">platformer</a> is a good reference - <a href="https://github.com/bare-engine/bare-platformer/blob/main/src/components/playerComponent.ts">playerComponent.ts</a>.
 <br><br>
-<b>types/globals.d.ts</b> - This just gives you a __DEV__ keyword. Use any `if (__DEV__) {...}` to execute this code during development and completely strip it from production.
+
+<b>src/generated/</b> - Vite has generated assets.ts in here. This file is not for editing. It gives you code access to your asset files. For example, you could call <code>this.AddGameObject(Asset.Image.EMOJI_GEAR)</code>. Any image file used in the project can be found under Asset.Image.xxx, giving you nice auto-complete.
+<br><br>
+
+<b>types/globals.d.ts</b> - This just gives you a __DEV__ keyword. Use <code>if (__DEV__) {...}</code> to execute this code during development and completely strip it from production.
 <br>
 <br>
+
 <h2>Zooming out</h2>
-I've mentioned some concepts like gameObjects, entities, components, but how do they work?
+I've mentioned some concepts like gameObjects, entities, and components, but how do they work?
 <br><br>
-<b>Scene</b> - A Scene is a container of gameObjects. It manages their lifecycle, updates them every frame, handles rendering, and provides access to shared systems such as input, audio, and physics. Scenes are typically used to organize different parts of a game, such as gameplay screens, UI or menus.
+
+<b>Scene</b> - Scenes are used to organize different parts of a game, such as gameplay screens, UI, or menus. Each scene holds a number of controllers. By default, only the objectController is active, updating and rendering your gameObjects. Once you reference any other controller, e.g. mouseController, every scene will now run this controller as well. This means none of these controllers even exist in code until you reference them.
 <br><br>
-<b>GameObject</b> - This is the object containing all your basic properties: x, y, scale, rotation, pivot, alpha etc. Unique to Bare, it also has inner-position/scale/rotation fields. This makes transformations much more convenient without the need for nesting gameObjects.
-It also supports: parent/child hierarchies, components, custom shaders, masks, event callbacks and pointer interaction (click, hover, touch)
+
+<b>GameObject</b> - This is the object containing all your basic properties: x, y, scale, rotation, pivot, alpha, etc. Unique to Bare, it also has inner-position/scale/rotation fields. This makes transformations much more convenient without the need for nesting gameObjects.
+It also supports parent/child hierarchies, components, custom shaders, masks, event callbacks, and pointer interaction (click, hover, touch).
 <br><br>
-<b>Entity</b> - This is a data object that you generally define in settingsData.json, although it can also be defined in code. An example would be var <code>var entity = { name: "test", texture: "ball", x: 50 }</code>. Then you turn it into a GameObject using: <code>this.AddGameObject(entity)</code>, which applies the entity's properties to the GameObject.
+
+<b>Entity</b> - This is a data object that you generally define in settingsData.json, although it can also be defined in code. An example would be <code>var entity = { name: "test", texture: "ball", x: 50 }</code>. Then you turn it into a GameObject using <code>this.AddGameObject(entity)</code>, which applies the entity's properties to the GameObject.
 <br><br>
-<b>Base Entity</b> - A base entity is not very different from an entity, it can contain the same properties, but, you generally don't apply these to gameObjects directly. They are used as building block for regular entities. For example, a predefined base entity is ANY_ENTITY. When you would give this the property <code>pivot: {x: .5, y: .5}</code>, every entity automatically inherits this. Of course, you can also define your own base entity, say, "myBaseEntiy" and let a regular entity extend it, eg: <code>{ name: "test", baseEntity: "myBaseEntiy" }</code>. Base entities can also extend each other in a chain, which regular entities cannot (can only extend a base entity).
+
+<b>Base Entity</b> - A base entity is not very different from an entity. It can contain the same properties, but you generally don't apply these to gameObjects directly. They are used as building blocks for regular entities. For example, a predefined base entity is ANY_ENTITY. When you give this the property <code>pivot: {x: .5, y: .5}</code>, every entity automatically inherits this. Of course, you can also define your own base entity, say, "myBaseEntity", and let a regular entity extend it, e.g. <code>{ name: "test", baseEntity: "myBaseEntity" }</code>. Base entities can also extend each other in a chain, which regular entities cannot (they can only extend a base entity).
 <br><br>
-<b>Level</b> - A level is simply a collection of entities. They will turn into gameObjects when loaded. Usually entities have a name, referring to a predefined entity in settingsData.json.
+
+<b>Level</b> - A level is simply a collection of entities. They will turn into gameObjects when loaded. Usually, entities have a name, referring to a predefined entity in settingsData.json.
 <br><br>
-<b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code> or define them in the entity: <code>{components: {player: {}}</code>
+
+<b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code>, and more. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the entity: <code>{ components: { player: {} } }</code>.
+<br>
+<br>
+
+<h2>Important Classes</h2>
+Bare Engine contains a bunch of classes to help you make your game.
+<br><br>
+
+<b>bare</b> - This is a reference to the top-level class <code>BareEngine</code>. It runs the main loop (update + render), controls the canvas, sends events, etc. It can restart the entire game with <code>bare.Restart()</code>. It also calls the <code>sceneController</code>, which (no surprise) controls the scenes.
+<br><br>
+
+<b>sceneController</b> - Contains all the scenes. It updates and renders them. You can also change the order they are in with methods <code>MoveUp</code>, <code>MoveDown</code>, <code>MoveToFront</code>, and <code>MoveToBack</code>. And there are many more convenience methods. If you're familiar with Phaser, you might recognise a few.
+<br><br>
+
+<b>uiScene</b> - <code>uiScene.AddGameObject(joystick)</code>, as seen in bare-rpg. This uiScene is always on top.
+<br><br>
+
+<h2>Each scene can contain the following classes:</h2>
+
+<b>objectController</b> (standard) - Contains methods to add, remove, and get gameObjects.
+<br><br>
+
+<b>mouseController</b> - Handles everything around the mouse. To get its position, use <code>mouseController.screen.position</code> or <code>mouseController.world.position</code>.
+<br><br>
+
+<b>componentController</b> - Handles the components. You can add one to a GameObject using <code>componentController.AddComponent(gameObject, WobbleComponent)</code>. For convenience, you can also apply this straight to the GameObject: <code>gameObject.AddComponent(WobbleComponent)</code>.
+<br><br>
+
+<b>tweenController</b> - Contains all your methods to manage tweens. To save you some typing, you can do a global call like: <code>TweenTo(gameObject, 1.2, { rotation: 45 });</code>. This is the equivalent of <code>tweenController.TweenTo(...);</code>.
+<br><br>
+
+<b>hitboxController</b> - This detects if you click on a gameObject with a tapHitbox. You could call <code>hitboxController.OnPointerDown(gameObject, (go) => { trace("clicked " + go.name) })</code>. Once again, you can also apply this to a GameObject directly: <code>gameObject.OnPointerDown((go) => { trace("clicked " + go.name) })</code>.
+<br><br>
+
+<b>arcadePhysicsController</b> - This enables simple rectangle and circle collisions. Not realistic, but perfect for many games. You can enable it by calling <code>bare.AddClass(ArcadePhysicsController)</code> in your Game constructor with <code>import { ArcadePhysicsController } from 'bare-engine/arcade'</code>. I mention the import because IntelliSense doesn't give it to you. Then you can create an <code>ArcadeObject</code> that will be controlled by it.
+<br><br>
+
+<b>sopiroPhysicsController</b> - This gives you realistic physics using <a href="https://github.com/Sopiro/Physics">Sopiro</a>. It's functional, and you can see it in the showcase project, but it's not very well supported yet.
+<br><br>
+
+<b>particleController</b> - Particles! Gotta have them. You can add an emitter with <code>particleController.Add(this.explosionEmitter)</code>. See the showcase project once again. Though generally, you would attach a <code>ParticleComponent</code> to a gameObject, either by code or in an entity. The game examples show this well.
+<br><br>
+
+<b>levelHandler</b> - The main method here is <code>levelHandler.LoadLevel("level1")</code>, which will try to load "level1" from public/data/levels/level1.json. Or, if the level was saved, it will load that. Other methods include <code>LoadLevel</code>, <code>SaveLevel</code>, and <code>RestartLevel</code>.
+<br><br>
+
+<b>cameraHandler</b> - Manages the camera: <code>SetPosition</code>, <code>SetDimensions</code>, <code>SetBounds</code>, and <code>SetZoom</code>.
+<br><br>
