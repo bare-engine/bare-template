@@ -1,5 +1,5 @@
 <h1>Bare Template</h1>
-The starting point for a new project using the Bare Engine.
+The starting point for a new project using the <a href="https://github.com/bare-engine/bare-engine">Bare Engine</a>.
 
 <br>
 <br>
