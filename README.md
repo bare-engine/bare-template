@@ -6,6 +6,7 @@ The starting point for a new project using the Bare Engine.
 
 <h2>Getting Started</h2>
 
+Click code->"download zip" and run `npm install` + `npm run dev`<br><br>Or:<br>
 <ol>
     <li>Install <a href="https://nodejs.org/en/download">Node.js</a></li>
     <li>Click <b>Use this template</b> in the top right - create the repo.</li>
@@ -16,7 +17,6 @@ npm run dev</code></pre></li>
     <li>Open the URL shown in the terminal.</li>
 </ol>
 <br>
-Or click code->download zip and follow the npm commands in step 3<br>
 (An npm create command will be there in the future to make this process easier)
 <br>
 
