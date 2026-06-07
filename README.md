@@ -7,16 +7,22 @@ The starting point for a new project using the <a href="https://github.com/bare-
 <h2>Getting Started</h2>
 
 Install <a href="https://nodejs.org/en/download">Node.js</a><br><br>
-Click code->"download zip" and run `npm install` + `npm run dev`<br>in the bare-template-main folder, from your command line<br><br>Or:<br>
 <ol>
-    <li>Click <b>Use this template</b> in the top right - create the repo.</li>
+    <li>Click Code->"Download ZIP" - unzip</li>
+    <li>Open the command line in the bare-showcase-main folder</li>
+    <li>Run <code>npm install</code> + <code>npm run dev</code></li>
+    <li>Ctrl-click the localhost URL shown in the command line.</li>
+</ol>
+<br>Or:<br>
+<ol>
+    <li>Click "Use this template" in the top right - create the repo.</li>
     <li><pre><code>git clone https://github.com/PATH-TO-YOUR-REPO.git bare-game
 cd bare-game
 npm install
 npm run dev</code></pre></li>
+    <li>Ctrl-click the localhost URL shown in the command line.</li>
 </ol>
 
-CTRL-click the localhost URL shown in the command line.<br><br>
 (An npm create command will be there in the future to make this process easier)
 <br><br>
 
