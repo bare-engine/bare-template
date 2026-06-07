@@ -7,18 +7,18 @@ The starting point for a new project using the <a href="https://github.com/bare-
 <h2>Getting Started</h2>
 
 Install <a href="https://nodejs.org/en/download">Node.js</a><br><br>
-Click code->"download zip" and run `npm install` + `npm run dev` in the folder from your command line<br><br>Or:<br>
+Click code->"download zip" and run `npm install` + `npm run dev`<br>in the bare-template-main folder, from your command line<br><br>Or:<br>
 <ol>
     <li>Click <b>Use this template</b> in the top right - create the repo.</li>
     <li><pre><code>git clone https://github.com/PATH-TO-YOUR-REPO.git bare-game
 cd bare-game
 npm install
 npm run dev</code></pre></li>
-    <li>Open the URL shown in the terminal.</li>
 </ol>
-<br>
+
+CTRL-click the localhost URL shown in the command line.<br><br>
 (An npm create command will be there in the future to make this process easier)
-<br>
+<br><br>
 
 <h2>Getting Going</h2>
 <ol>
@@ -73,8 +73,10 @@ It also supports parent/child hierarchies, components, custom shaders, masks, ev
 
 <b>Level</b> - A level holds layers that contain entities. They will turn into gameObjects when loaded. Usually, entities have a name, referring to a predefined entity in settingsData.json. Any extra properties they have will override the ones found in the predefined entity.
 <br><br>
+
 <b>Layer</b> - Within a Scene, gameObjects are structured under layers. <code>Data.Layer.OBJECTS</code> is the default one. GameObjects are added to and it will always be there. You can add more in settingsData.json, eg: <code>"layers": ["objects", "background"]</code>. Now Data.Layer is autimatically updated to include the background layer.
 <br><br>
+
 <b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the entity: <code>{ components: { player: {} } }</code>.
 <br>
 <br>
@@ -127,3 +129,15 @@ Bare Engine contains a bunch of classes to help you make your game.
 ### Gotcha:
 All these controllers live under a Scene, but you might get a warning if Bare cannot figure out which. Generally, it transforms a call like this: <code>levelHandler.LoadLevel("level1")</code> -> <code>this.scene.levelHandler.LoadLevel("level1")</code>. That means a scene property should always be present, or the call should be in the scene itself. <br><br>
 If you wanted to call a method in another scene, you could do: <code>SceneController.Get(Game).levelHandler.LoadLevel("level1")</code>
+<br><br>
+
+<h2>Chrome Extension</h2>
+The <a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb">Chrome Extension</a> helps you interface with the settingsData.json. Install it, press F12 (developer tools) and open the "Bare Engine" tab to start using it. <br><br>
+
+The extension enables you to:<ul>
+    <li>View and edit objects+components in the scene</li>
+    <li>View and edit entities</li>
+    <li>Jump to any level</li>
+    <li>Trigger debug buttons and add your own</li>
+</ul>
+This will become a paid future at some point.
