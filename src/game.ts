@@ -14,7 +14,7 @@ export class Game extends Scene
 
     OnStart()
     {
-        this.obj = this.AddGameObject(Asset.Image.EMOJI_GEAR)
+        this.obj = this.AddGameObject('⚙')
             .SetPosition(bare.width * .5, bare.height * .5)
             .CenterPivot();
     }
