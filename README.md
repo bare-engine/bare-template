@@ -26,6 +26,9 @@ npm run dev</code></pre></li>
 (An npm create command will be there in the future to make this process easier)
 <br><br>
 
+🚧 Note: The engine is still in active development, some features may be unstable 🚧
+<br><br>
+
 <h2>Getting Going</h2>
 <ol>
     <li><a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb">Chrome Extension</a> - Get the extension</li>
@@ -140,10 +143,36 @@ If you wanted to call a method in another scene, you could do: <code>SceneContro
 <h2>Chrome Extension</h2>
 The <a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb">Chrome Extension</a> helps you interface with the settingsData.json. Install it, press F12 (developer tools) and open the "Bare Engine" tab to start using it. <br><br>
 
-The extension enables you to:<ul>
+The extension enables you to:
+<ul>
     <li>View and edit objects+components in the scene</li>
     <li>View and edit entities</li>
     <li>Jump to any level</li>
     <li>Trigger debug buttons and add your own</li>
+    <li>Right click object to move it or see its properties</li>
 </ul>
-This will become a paid future at some point.
+This will become a paid future at some point.<br><br>
+
+It is still being worked on. Coming features will include:
+<ul>
+    <li>Animations setup</li>
+    <li>Particle Editor</li>
+    <li>Layers setup</li>
+    <li>Collision layers matrix</li>
+    <li>Edit settings like gravity</li>
+    <li>View/Edit scene properties</li>
+    <li>View layers in objects list</li>
+    <li>Add/edit presets</li>
+    <li>Diagnostics</li>
+    <li>View tweens, pools, textures, sounds in memory</li>
+    <li>Pause button</li>
+</ul>
+
+<h2>Bare Engine coming features:</h2>
+<ul>
+    <li>Tilemap support</li>
+    <li>Enable scaling+rotation of objects in level editor</li>
+    <li>FPS counter</li>
+    <li>Manipulating object and hitbox properties in entity editor with mouse</li>
+    <li>Documentation</li>
+</ul>
