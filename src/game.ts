@@ -1,7 +1,6 @@
 import { GameObject, Scene, StartBare } from 'bare-engine';
 //import { ArcadeObject, ArcadePhysicsController } from 'bare-engine/arcade';
 import settingsDataJson from '../public/data/settingsData.json';
-import { Asset } from './generated/assets';
 
 export class Game extends Scene
 {
