@@ -6,7 +6,7 @@ The starting point for a new project using the <a href="https://github.com/bare-
 
 <h2>Getting Started</h2>
 
-Install <a href="https://nodejs.org/en/download">Node.js</a><br><br>
+Install <a href="https://nodejs.org/en/download">Node.js</a> and <a href="https://git-scm.com/download/win">Git</a><br><br>
 <ol>
     <li>Click Code->"Download ZIP" - unzip</li>
     <li>Open the command line in the bare-showcase-main folder</li>
