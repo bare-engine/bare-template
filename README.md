@@ -89,50 +89,112 @@ It also supports parent/child hierarchies, components, custom shaders, masks, ev
 <b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the entity: <code>{ components: { player: {} } }</code>.
 <br>
 <br>
+<br>
 
-<h2>Important Classes</h2>
-Bare Engine contains a bunch of classes to help you make your game.
+<h2>The bare Object</h2>
+<code>bare</code> is the global entry point to the engine — a single instance of the
+top-level <code>BareEngine</code> class, available everywhere. You can access three kinds of fields from it: <b>global modules</b>, <b>scene modules</b> and <b>general properties</b>.
+<br><br>
+<h3>Global modules</h3>
+These are instances that are shared across the entire game.<br><br>
+
+<b>bare.keyboard</b> - Reads keyboard input. Check whether
+keys are held, pressed this frame, or released.
 <br><br>
 
-<b>bare</b> - This is a reference to the top-level class <code>BareEngine</code>. It runs the main loop (update + render), controls the canvas, sends events, etc. It can restart the entire game with <code>bare.Restart()</code>. It also calls the <code>sceneController</code>, which (no surprise) controls the scenes.
+<b>bare.sound</b> - Plays and manages audio (sound effects and
+music).
 <br><br>
 
-<b>sceneController</b> - Contains all the scenes. It updates and renders them. You can also change the order they are in with methods <code>MoveUp</code>, <code>MoveDown</code>, <code>MoveToFront</code>, and <code>MoveToBack</code>. And there are many more convenience methods. If you're familiar with Phaser, you might recognise a few.
+<b>bare.scene</b> - The scene manager. Add, remove, reorder
+and fetch scenes (<code>MoveUp</code>, <code>MoveToFront</code>, etc.).
 <br><br>
 
-<b>uiScene</b> - This is a UI scene, automatically added when you refernce it. You can do: <code>uiScene.AddGameObject(joystick)</code> (as seen in bare-rpg) to add something to the uiScene. This uiScene is always on top.
+<b>bare.asset</b> - Loads and holds your assets (images,
+fonts, data), so the rest of the engine can pull them by key.
 <br><br>
 
-### Each scene can contain the following classes:
-
-<b>objectController</b> (standard) - Contains methods to add, remove and get gameObjects.
+<b>bare.storage</b> - Persistent save data. Read and write
+values that survive between sessions.
 <br><br>
 
-<b>mouseController</b> - Handles everything around the mouse. To get its position, use <code>mouseController.screen.position</code> or <code>mouseController.world.position</code>. There are more methods to check if mouse is down and such.
+<b>bare.pool</b> - The object pools, keyed by
+type. Used to recycle <code>GameObject</code>s instead of constantly creating and
+destroying them.
 <br><br>
 
-<b>componentController</b> - Handles the components. You can add one to a GameObject using <code>componentController.AddComponent(gameObject, WobbleComponent)</code>. For convenience, you can also apply this straight to the GameObject: <code>gameObject.AddComponent(WobbleComponent)</code>.
+<b>bare.ui</b> - A special always-on-top UI scene. It's a proxy: the
+UI scene is lazily created the first time you reference it. Use
+<code>bare.ui.AddGameObject(joystick)</code> to put something on the UI layer.
 <br><br>
 
-<b>tweenController</b> - Contains all your methods to manage tweens. To save you some typing, you can do a global call like: <code>TweenTo(gameObject, 1.2, { rotation: 45 });</code>. This is the equivalent of <code>tweenController.TweenTo(...);</code>.
+<b>bare.globalEvents</b> - A game-wide event bus.
+Unlike <code>bare.events</code> (which is per-scene), these events are heard across the
+whole game.
 <br><br>
 
-<b>hitboxController</b> - This detects if you click on a gameObject with a tapHitbox. You could call <code>hitboxController.OnPointerDown(gameObject, (go) => { trace("clicked " + go.name) })</code>. Once again, you can also apply this to a GameObject directly: <code>gameObject.OnPointerDown((go) => { trace("clicked " + go.name) })</code>.
+<b>bare.editor</b> - A getter that returns the level-editor scene
+if one is currently active.
 <br><br>
 
-<b>arcadePhysicsController</b> - This enables simple rectangle and circle collisions. Not realistic, but perfect for many games. You can enable it by calling <code>bare.AddClass(ArcadePhysicsController)</code> in your Game constructor with <code>import { ArcadePhysicsController } from 'bare-engine/arcade'</code>. I mention the import because IntelliSense doesn't give it to you. Then you can create an <code>ArcadeObject</code> that will be controlled by it.
+<h3>Scene modules</h3>
+These are <i>per-scene</i> and automatically resolved to the currently active scene. When you write <code>bare.object</code>, <code>bare.tween</code>, etc., this gets build-time transformed.
+<code>bare.[sceneModule]</code> becomes: <code>this.scene.[sceneModule]</code>. So you
+always get the controller belonging to the scene the call-site lives in. No manual scene lookup.
 <br><br>
 
-<b>sopiroPhysicsController</b> - This gives you realistic physics using <a href="https://github.com/Sopiro/Physics">Sopiro</a>. It's functional, and you can see it in the showcase project, but it's not very well supported yet.
+<b>bare.events</b> - The current scene's event bus.
+Emit and listen for events scoped to this scene only.
 <br><br>
 
-<b>particleController</b> - Particles! Gotta have them. You can add an emitter with <code>particleController.Add(this.explosionEmitter)</code>. See the showcase project once again. Though generally, you would attach a <code>ParticleComponent</code> to a gameObject, either by code or in an entity. The game examples show this well.
+<b>bare.object</b> - Add, remove and get
+<code>GameObject</code>s in the current scene.
 <br><br>
 
-<b>levelHandler</b> - The main method here is <code>levelHandler.LoadLevel("level1")</code>, which will try to load "level1" from public/data/levels/level1.json. Or, if the level was saved, it will load that. Other methods include <code>LoadLevel</code>, <code>SaveLevel</code>, and <code>RestartLevel</code>.
+<b>bare.component</b> - Manage components on
+GameObjects, e.g. <code>bare.component.AddComponent(gameObject, WobbleComponent)</code> (or
+the shorthand <code>gameObject.AddComponent(WobbleComponent)</code>).
 <br><br>
 
-<b>cameraHandler</b> - Manages the camera: <code>SetPosition</code>, <code>SetDimensions</code>, <code>SetBounds</code>, and <code>SetZoom</code>.
+<b>bare.mouse</b> - Mouse input for this scene. Position via
+<code>bare.mouse.screen.position</code> or <code>bare.mouse.world.position</code>, plus
+down/up checks.
+<br><br>
+
+<b>bare.tween</b> - Tweens for this scene. Note the global
+shorthand <code>TweenTo(gameObject, 1.2, { rotation: 45 })</code>, which is equivalent to
+<code>bare.tween.TweenTo(...)</code>.
+<br><br>
+
+<b>bare.particle</b> - Particle emitters. Add one with
+<code>bare.particle.Add(this.explosionEmitter)</code>, or attach a
+<code>ParticleComponent</code> to a GameObject.
+<br><br>
+
+<b>bare.hitbox</b> - Pointer hit detection on GameObjects
+with a tapHitbox, e.g. <code>bare.hitbox.OnPointerDown(gameObject, (go) =&gt; {})</code> (or
+<code>gameObject.OnPointerDown(...)</code>).
+<br><br>
+
+<b>bare.arcade</b> - Simple rectangle/circle
+collision physics. Enable it with <code>bare.AddClass(ArcadePhysicsController)</code> in
+your Game constructor (import from <code>'bare-engine/arcade'</code>), then use
+<code>ArcadeObject</code>s.
+<br><br>
+
+<b>bare.sopiro</b> - Realistic physics via
+<a href="https://github.com/Sopiro/Physics">Sopiro</a>. Functional but not yet
+well-supported.
+<br><br>
+
+<b>bare.level</b> - Level loading and saving:
+<code>bare.level.LoadLevel("level1")</code>, <code>SaveLevel</code>,
+<code>RestartLevel</code>.
+<br><br>
+
+<b>bare.camera</b> - The scene camera:
+<code>SetPosition</code>, <code>SetDimensions</code>, <code>SetBounds</code>,
+<code>SetZoom</code>.
 <br><br>
 
 ### Gotcha:
