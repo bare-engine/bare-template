@@ -63,11 +63,11 @@ npm run dev</code></pre></li>
 I've mentioned some concepts like gameObjects, entities, and components, but how do they work?
 <br><br>
 
-<b>Scene</b> - Scenes are used to organize different parts of a game, such as gameplay screens, UI, or menus. Each scene holds a number of controllers. By default, only the objectController is active, updating and rendering your gameObjects. Once you reference any other controller, e.g. mouseController, every scene will now run this controller as well. This means none of these controllers even exist in code until you reference them.
+<b>Scene</b> - Scenes are used to organize different parts of a game, such as gameplay screens, UI, or menus. Each scene holds a number of controllers. By default, only the objectController (bare.object) is active, updating and rendering your gameObjects. Once you reference any other controller, e.g. mouseController (bare.mouse), every scene will now run this controller as well. This means none of these controllers even exist in code until you reference them.
 <br><br>
 
 <b>GameObject</b> - This is the object containing all your basic properties: x, y, scale, rotation, pivot, alpha, etc. Uniquely to Bare, it also has inner-position/scale/rotation fields. This makes transformations much more convenient without the need for nesting gameObjects.
-It also supports parent/child hierarchies, components, custom shaders, masks, event callbacks, and pointer interaction (click, hover).
+It also supports parent/child hierarchies, components, custom shaders, masks, events, and pointer interaction.
 <br><br>
 
 <b>Entity</b> - This is a data object that you generally define in settingsData.json, although it can also be defined in code. An example would be <code>var entity = { name: "test", texture: "ball", x: 50 }</code>. Then you turn it into a GameObject using <code>this.AddGameObject(entity)</code>, which applies the entity's properties to create a new GameObject.
@@ -159,7 +159,7 @@ down/up checks.
 
 <b>bare.tween</b> - Tweens for this scene. Note the global
 shorthand <code>TweenTo(gameObject, 1.2, { rotation: 45 })</code>, which is equivalent to
-<code>bare.tween.TweenTo(...)</code>.
+<code>bare.tween.To(...)</code>.
 <br><br>
 
 <b>bare.particle</b> - Particle emitters. Add one with
