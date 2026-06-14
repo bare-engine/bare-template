@@ -59,10 +59,6 @@ npm run dev</code></pre></li>
 <b>src/generated/</b> - Vite has generated assets.ts in here. This file is not for editing. It gives you code access to your asset files. For example, you could call <code>this.AddGameObject(Asset.Image.EMOJI_GEAR)</code>. Any image file used in the project can be found under Asset.Image.xxx, giving you a nice auto-complete.
 <br><br>
 
-<b>types/globals.d.ts</b> - This just gives you a `__DEV__` keyword. Use `if (__DEV__) {...}` to execute this code during development. It will be completely stripped in production.
-<br>
-<br>
-
 <h2>Zooming out</h2>
 I've mentioned some concepts like gameObjects, entities, and components, but how do they work?
 <br><br>
