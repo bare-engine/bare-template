@@ -240,11 +240,9 @@ It is still being worked on. Coming features will include:
     <li>Layers setup</li>
     <li>Collision layers matrix</li>
     <li>Edit settings like gravity</li>
-    <li>View/Edit scene properties</li>
     <li>View layers in objects list</li>
     <li>Add/edit presets</li>
     <li>Diagnostics</li>
-    <li>View tweens, pools, textures, sounds in memory</li>
     <li>Pause button</li>
 </ul>
 
