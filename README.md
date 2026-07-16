@@ -184,7 +184,7 @@ well-supported.
 <br><br>
 
 <b>bare.level</b> - Level loading and saving:
-<code>bare.level.LoadLevel("level1")</code>, <code>SaveLevel</code>,
+<code>bare.level.Load("level1")</code>, <code>SaveLevel</code>,
 <code>RestartLevel</code>.
 <br><br>
 
@@ -216,8 +216,8 @@ optionally with a different starting scene and/or new options.<br>
 <br><br>
 
 ### Gotcha:
-All these controllers live under a Scene, but you might get a warning if Bare cannot figure out which. Generally, it transforms a call like this: <code>levelHandler.LoadLevel("level1")</code> -> <code>this.scene.levelHandler.LoadLevel("level1")</code>. That means a scene property should always be present, or the call should be in the scene itself. <br><br>
-If you wanted to call a method in another scene, you could do: <code>SceneController.Get(Game).levelHandler.LoadLevel("level1")</code>
+All these controllers live under a Scene, but you might get a warning if Bare cannot figure out which. Generally, it transforms a call like this: <code>bare.level.Load("level1")</code> -> <code>this.scene.level.Load("level1")</code>. That means a scene property should always be present, or the call should be in the scene itself. <br><br>
+If you wanted to call a method in another scene, you could do: <code>SceneController.Get(Game).level.Load("level1")</code>
 <br><br>
 
 <h2>Chrome Extension</h2>
