@@ -197,21 +197,20 @@ well-supported.
 Beyond the modules, <code>bare</code> exposes a set of plain properties and helper methods, here are the most common ones:
 <br><br>
 
-<b>bare.deltaTime</b> - Seconds elapsed since the last frame (capped by maxDeltaTime).<br>
-<b>bare.count</b> - The number of frames rendered so far.<br>
+<b>bare.deltaTime</b> - Seconds elapsed since the last frame (capped by maxDeltaTime).<br><br>
+<b>bare.count</b> - The number of frames rendered so far.<br><br>
 <b>bare.width</b> / <b>bare.height</b> - The current logical render size of the canvas (in
-game units, after resolution scaling).<br>
-
+game units, after resolution scaling).<br><br>
 <b>bare.Restart(sceneClass?, options?)</b> - Clears all scenes and restarts the game,
-optionally with a different starting scene and/or new options.<br>
+optionally with a different starting scene and/or new options.<br><br>
 <b>bare.SendEvent(type, ...args)</b> - Fires an event both globally
 (<code>bare.globalEvents</code>) and to every active, non-paused scene's
-<code>bare.events</code>.<br>
+<code>bare.events</code>.<br><br>
 <b>bare.AddClass(SomeClass)</b> - Registers a class with the engine. For a controller (e.g.
 <code>ArcadePhysicsController</code>) it activates that module across scenes; for a
-<code>GameObject</code> subclass it sets up a pool so the type can be spawned by name.<br>
+<code>GameObject</code> subclass it sets up a pool so the type can be spawned by name.<br><br>
 <b>bare.RegisterGameObjectPool(cls, size?)</b> - Manually registers an object pool for a
-<code>GameObject</code> class (what <code>AddClass</code> does for you under the hood).<br>
+<code>GameObject</code> class (what <code>AddClass</code> does for you under the hood).<br><br>
 <b>bare.SetBackgroundColor(color)</b> - Sets the canvas clear color.
 <br><br>
 
