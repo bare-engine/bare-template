@@ -28,6 +28,6 @@
         "bare-engine": "github:BareEngine/BareEngine"
     },
     "bareEngine": {
-		
+        "gameId": "bareTemplate"
     }
 }
