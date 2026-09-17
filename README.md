@@ -70,10 +70,10 @@ I've mentioned some concepts like gameObjects, entities, and components, but how
 It also supports parent/child hierarchies, components, custom shaders, masks, events, and pointer interaction.
 <br><br>
 
-<b>Entity</b> - This is a data object that you generally define in settingsData.json, although it can also be defined in code. An example would be <code>var entity = { name: "test", texture: "ball", x: 50 }</code>. Then you turn it into a GameObject using <code>this.AddGameObject(entity)</code>, which applies the entity's properties to create a new GameObject.
+<b>Entity</b> - This is a data object that you generally define in settingsData.json, although it can also be defined in code. An example would be <code>var entity = { name: "test", texture: "ball", x: 50, y: 70 }</code>. Then you turn it into a GameObject using <code>this.AddGameObject(entity)</code>, which applies the entity's properties to create a new GameObject.
 <br><br>
 
-<b>Base Entity</b> - A base entity is not very different from an entity. It can contain the same properties, but you generally don't apply these to gameObjects directly. They are used as building blocks for regular entities. For example, a predefined base entity is ANY_ENTITY. When you give this the property <code>pivot: {x: .5, y: .5}</code>, every entity automatically inherits this. Of course, you can also define your own base entity, say, "myBaseEntity", and let a regular entity extend it, e.g. <code>{ name: "test", baseEntity: "myBaseEntity" }</code>. Another predefined base entity is ANY, this is extended by ANY_ENTITY and any base entity. So as you can see, base entities can extend each other in a chain, which regular entities cannot (they can only extend a base entity).
+<b>Base Entity</b> - A base entity is not very different from an entity. It can contain the same properties, but you generally don't apply these to gameObjects directly. They are used as building blocks for regular entities. For example, a predefined base entity is ANY. When you give this the property <code>pivot: {x: .5, y: .5}</code>, every entity automatically inherits this. Of course, you can also define your own base entity, say, "myBaseEntity", and let a regular entity extend it, e.g. <code>{ name: "test", entity: "myBaseEntity" }</code>.
 <br><br>
 
 <b>Level</b> - A level holds layers that contain entities. They will turn into gameObjects when loaded. Usually, entities have a name, referring to a predefined entity in settingsData.json. Any extra properties they have will override the ones found in the predefined entity.
@@ -82,17 +82,22 @@ It also supports parent/child hierarchies, components, custom shaders, masks, ev
 <b>Layer</b> - Within a Scene, gameObjects are structured under layers. <code>Data.Layer.OBJECTS</code> is the default one. GameObjects are added to and it will always be there. You can add more in settingsData.json, eg: <code>"layers": ["objects", "background"]</code>. Now Data.Layer is autimatically updated to include the background layer.
 <br><br>
 
-<b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the entity: <code>{ components: { player: {} } }</code>.
+<b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. The classname needs to end with "Component", eg: PlayerComponent. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the entity: <code>{ components: { player: {} } }</code>.
 <br>
 <br>
 <br>
 
 <h2>The bare Object</h2>
 <code>bare</code> is the global entry point to the engine — a single instance of the
-top-level <code>BareEngine</code> class, available everywhere. You can access three kinds of fields from it: <b>global modules</b>, <b>scene modules</b> and <b>general properties</b>.
+top-level <code>BareEngine</code> class, available (almost) everywhere. You can access three kinds of fields from it: <b>global modules</b>, <b>scene modules</b> and <b>general properties</b>.
 <br><br>
 <h3>Global modules</h3>
 These are instances that are shared across the entire game.<br><br>
+
+<b>bare.mouse</b> - Mouse input for this scene. Position via
+<code>bare.mouse.screen.position</code> or <code>bare.mouse.world.position</code>, plus
+down/up checks.
+<br><br>
 
 <b>bare.keyboard</b> - Reads keyboard input. Check whether
 keys are held, pressed this frame, or released.
@@ -125,7 +130,7 @@ UI scene is lazily created the first time you reference it. Use
 <br><br>
 
 <b>bare.globalEvents</b> - A game-wide event bus.
-Unlike <code>bare.events</code> (which is per-scene), these events are heard across the
+Unlike <code>bare.events</code> (which is per-scene), these events are emitted across the
 whole game.
 <br><br>
 
@@ -150,11 +155,6 @@ Emit and listen for events scoped to this scene only.
 <b>bare.component</b> - Manage components on
 GameObjects, e.g. <code>bare.component.AddComponent(gameObject, WobbleComponent)</code> (or
 the shorthand <code>gameObject.AddComponent(WobbleComponent)</code>).
-<br><br>
-
-<b>bare.mouse</b> - Mouse input for this scene. Position via
-<code>bare.mouse.screen.position</code> or <code>bare.mouse.world.position</code>, plus
-down/up checks.
 <br><br>
 
 <b>bare.tween</b> - Tweens for this scene. Note the global
