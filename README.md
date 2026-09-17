@@ -242,14 +242,10 @@ It is still being worked on. Coming features will include:
     <li>View layers in objects list</li>
     <li>Add/edit presets</li>
     <li>Diagnostics</li>
-    <li>Pause button</li>
 </ul>
 
 <h2>Bare Engine coming features:</h2>
 <ul>
     <li>Tilemap support</li>
-    <li>Enable scaling+rotation of objects in level editor</li>
-    <li>FPS counter</li>
-    <li>Manipulating object and hitbox properties in entity editor with mouse</li>
     <li>Documentation</li>
 </ul>
