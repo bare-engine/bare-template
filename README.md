@@ -50,7 +50,7 @@ npm run dev</code></pre></li>
 <b>public/images/</b> - This is where you place your images (.webp) to be streamed in. Once again, <a href="https://github.com/bare-engine/bare-showcase/blob/main/public/demos/imageLoading/src/DemoImageLoading.ts">DemoImageLoading.ts</a> gives a good insight. You could put a ⚙️ png here, remove it from the texturePackImages folder, and it would automatically get streamed in. No changes to the code required. You can see <a href="https://github.com/bare-engine/bare-platformer">platformer</a> for an example where everything gets streamed in, even animations.
 <br><br>
 
-<b>src/game.ts</b> - The starting point of the code. It starts with <code>StartBare(Game);</code>, instantiating the class. This class has to extend the engine class <code>Scene</code>. In <code>super</code>, we supply it with the settingsData.json. This lets the scene use the data we provided there (currently none). <code>this.AddGameObject('⚙')</code> will try to resolve the '⚙': first, it will try to find an entity of the matching name, then an image in the initial assets (where it finds it), only then it will look in public/images/ to stream it in. After that, it creates a GameObject and adds it to the scene.
+<b>src/game.ts</b> - The starting point of the code. It starts with <code>StartBare(Game);</code>, instantiating the class. This class has to extend the engine class <code>Scene</code>. In <code>super</code>, we supply it with the settingsData.json. This lets the scene use the data we provided there (currently none). <code>this.AddGameObject('⚙')</code> will try to resolve the '⚙': first, it will try to find a prefab of the matching name, then an image in the initial assets (where it finds it), only then it will look in public/images/ to stream it in. After that, it creates a GameObject and adds it to the scene.
 <br><br>
 
 <b>src/components/</b> - Currently empty, but this is where you would place your ...Component.ts files. All game examples use these, but <a href="https://github.com/bare-engine/bare-platformer">platformer</a> is a good reference - <a href="https://github.com/bare-engine/bare-platformer/blob/main/src/components/playerComponent.ts">playerComponent.ts</a>.
@@ -60,7 +60,7 @@ npm run dev</code></pre></li>
 <br><br>
 
 <h2>Zooming out</h2>
-I've mentioned some concepts like gameObjects, entities, and components, but how do they work?
+I've mentioned some concepts like gameObjects, prefabs, and components, but how do they work?
 <br><br>
 
 <b>Scene</b> - Scenes are used to organize different parts of a game, such as gameplay screens, UI, or menus. Each scene holds a number of controllers. By default, only the objectController (bare.object) is active, updating and rendering your gameObjects. Once you reference any other controller, e.g. mouseController (bare.mouse), every scene will now run this controller as well. This means none of these controllers even exist in code until you reference them.
@@ -70,19 +70,19 @@ I've mentioned some concepts like gameObjects, entities, and components, but how
 It also supports parent/child hierarchies, components, custom shaders, masks, events, and pointer interaction.
 <br><br>
 
-<b>Entity</b> - This is a data object that you generally define in settingsData.json, although it can also be defined in code. An example would be <code>var entity = { name: "test", texture: "ball", x: 50, y: 70 }</code>. Then you turn it into a GameObject using <code>this.AddGameObject(entity)</code>, which applies the entity's properties to create a new GameObject.
+<b>Prefab</b> - This is a named data object that you generally define under <code>prefabs</code> in settingsData.json. An example would be <code>{ name: "test", texture: "ball", x: 50, y: 70 }</code>. Then you turn it into a GameObject using <code>this.AddGameObject("test")</code>, which applies the prefab's properties to create a new GameObject. The same kind of data object without being defined in settingsData.json, eg. passed straight to <code>this.AddGameObject({ texture: "ball" })</code> or stored in a level, is called an entity.
 <br><br>
 
-<b>Base Entity</b> - A base entity is not very different from an entity. It can contain the same properties, but you generally don't apply these to gameObjects directly. They are used as building blocks for regular entities. For example, a predefined base entity is ANY. When you give this the property <code>pivot: {x: .5, y: .5}</code>, every entity automatically inherits this. Of course, you can also define your own base entity, say, "myBaseEntity", and let a regular entity extend it, e.g. <code>{ name: "test", entity: "myBaseEntity" }</code>.
+<b>Base Prefab</b> - A base prefab is not very different from a prefab. It can contain the same properties, but you generally don't apply these to gameObjects directly. They are defined under <code>basePrefabs</code> and used as building blocks for regular prefabs. For example, a predefined base prefab is ANY. When you give this the property <code>pivot: {x: .5, y: .5}</code>, every prefab automatically inherits this. Of course, you can also define your own base prefab, say, "myBasePrefab", and let a regular prefab extend it, e.g. <code>{ name: "test", extends: "myBasePrefab" }</code>. Prefabs can extend each other in a chain: each one inherits the properties of the one it extends, and can override them.
 <br><br>
 
-<b>Level</b> - A level holds layers that contain entities. They will turn into gameObjects when loaded. Usually, entities have a name, referring to a predefined entity in settingsData.json. Any extra properties they have will override the ones found in the predefined entity.
+<b>Level</b> - A level holds layers that contain entities. They will turn into gameObjects when loaded. Usually, an entity extends a prefab from settingsData.json, eg. <code>{ extends: "test", position: { x: 10, y: 20 } }</code>. Any extra properties it has will override the ones found in the prefab.
 <br><br>
 
 <b>Layer</b> - Within a Scene, gameObjects are structured under layers. <code>Data.Layer.OBJECTS</code> is the default one. GameObjects are added to and it will always be there. You can add more in settingsData.json, eg: <code>"layers": ["objects", "background"]</code>. Now Data.Layer is autimatically updated to include the background layer.
 <br><br>
 
-<b>Component</b> - They can be attached to gameObjects or entities. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. The classname needs to end with "Component", eg: PlayerComponent. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the entity: <code>{ components: { player: {} } }</code>.
+<b>Component</b> - They can be attached to gameObjects or prefabs. They have to extend from <code>Component</code>, which works similarly to Unity. You have <code>OnAdded</code>, <code>OnUpdate</code>, <code>OnRemoved</code>, <code>@InspectorField</code> and more. The classname needs to end with "Component", eg: PlayerComponent. You can add them during runtime: <code>this.player.AddComponent(PlayerComponent)</code>, or define them in the prefab: <code>{ components: { player: {} } }</code>.
 <br>
 <br>
 <br>
@@ -225,7 +225,7 @@ The <a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnch
 The extension enables you to:
 <ul>
     <li>View and edit objects+components in the scene</li>
-    <li>View and edit entities</li>
+    <li>View and edit prefabs</li>
     <li>Jump to any level</li>
     <li>Trigger debug buttons and add your own</li>
     <li>Right click object to move it or see its properties</li>
