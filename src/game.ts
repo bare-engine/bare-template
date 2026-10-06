@@ -1,5 +1,4 @@
 import { GameObject, Scene, StartBare } from 'bare-engine';
-//import { ArcadeObject, ArcadePhysicsController } from 'bare-engine/arcade';
 import settingsDataJson from '../public/data/settingsData.json';
 
 export class Game extends Scene
@@ -10,7 +9,7 @@ export class Game extends Scene
     {
         super(settingsDataJson);
     }
-
+    
     OnStart()
     {
         this.obj = this.AddGameObject('⚙')
