@@ -3,7 +3,7 @@ import settingsDataJson from '../public/data/settingsData.json';
 
 export class Game extends Scene
 {
-    obj: GameObject;
+    obj!: GameObject;
     
     constructor()
     {
