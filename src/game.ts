@@ -17,9 +17,9 @@ export class Game extends Scene
             .CenterPivot();
     }
 
-    override OnFixedUpdate()
+    override OnUpdate(deltaTime: number): void
     {
-        this.obj.rotation++;
+        this.obj.rotation += 60 * deltaTime;
     }
 }
 
