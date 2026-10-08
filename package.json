@@ -20,7 +20,9 @@
     "dependencies": {
         "bare-engine": "github:BareEngine/BareEngine"
     },
-    "bareEngine": {},
+    "bareEngine": {
+		
+	},
     "allowScripts": {
         "esbuild": true,
         "sharp": true,
