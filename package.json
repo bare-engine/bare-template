@@ -13,7 +13,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/BareEngine/Template.git"
+        "url": "git+https://github.com/bare-engine/bare-template.git"
     },
     "author": "Jeroen Wimmers",
     "license": "MIT",
