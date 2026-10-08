@@ -11,10 +11,6 @@
         "analyze": "bare-engine-analyze",
         "build:assets": "node node_modules/bare-engine/scripts/buildAssets.cjs"
     },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/bare-engine/bare-template.git"
-    },
     "author": "Jeroen Wimmers",
     "license": "MIT",
     "devDependencies": {
