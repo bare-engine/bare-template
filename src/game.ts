@@ -7,7 +7,7 @@ export class Game extends Scene
     
     constructor()
     {
-        super(settingsDataJson);
+        super({settingsData: settingsDataJson});
     }
     
     override OnStart()
