@@ -23,7 +23,6 @@ npm run dev</code></pre></li>
     <li>Ctrl-click the localhost URL shown in the command line.</li>
 </ol>
 
-🚧 Note: The engine is still in active development, some features may be unstable 🚧
 <br><br>
 
 <h2>Getting Going</h2>
