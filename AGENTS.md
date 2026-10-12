@@ -35,6 +35,7 @@ Links inside the docs leave out `.md`: `./components` means `components.md` in t
 | Inspector / serialization decorators | `reference/inspector-decorators.md` |
 | Build, `bareEngine` options in package.json | `guide/building-and-publishing.md`, `reference/package-json.md` |
 | Something broken | `guide/troubleshooting.md`, `guide/debugging.md` |
+| Running the game in a headless browser, screenshots | `guide/debugging.md` (Testing in a headless browser) |
 
 ## Commands
 
@@ -45,7 +46,7 @@ Links inside the docs leave out `.md`: `./components` means `components.md` in t
 | `npm run build` | Production build to `dist/`. |
 | `npm run build-zip` | Build and zip to `dist.zip`. |
 | `npm run analyze` | Build and open a bundle size map. |
-| `npm run build:assets` | Run AssetPack without the dev server. |
+| `npm run build:assets` | Pack the texture atlas and generate `src/generated/assets.ts` without the dev server. Run it before `npx tsc` after adding images or prefabs while the dev server is off. |
 | `npm run update-engine` | Move to the newest engine release allowed by `package.json`. Updates `package-lock.json`. |
 
 On PowerShell setups that block `npm.ps1`, use `npm.cmd`.
