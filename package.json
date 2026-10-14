@@ -10,7 +10,7 @@
         "build-nolog": "vite build --config vite.config.cjs --mode production",
         "analyze": "bare-engine-analyze",
         "build:assets": "node node_modules/bare-engine/scripts/buildAssets.cjs",
-        "update-engine": "npm uninstall bare-engine && npm install bare-engine@github:bare-engine/bare-engine#semver:^0.6.0 && npm pkg set dependencies.bare-engine=github:bare-engine/bare-engine#semver:^0.6.0"
+        "update-engine": "npm uninstall bare-engine && npm install \"bare-engine@github:bare-engine/bare-engine#semver:^0.6.0\" && npm pkg set \"dependencies.bare-engine=github:bare-engine/bare-engine#semver:^0.6.0\""
     },
     "author": "Jeroen Wimmers",
     "license": "MIT",
