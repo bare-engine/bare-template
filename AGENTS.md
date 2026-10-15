@@ -23,6 +23,7 @@ Links inside the docs leave out `.md`: `./components` means `components.md` in t
 | Images, atlas, loading | `guide/assets.md`, `reference/assets.md` |
 | Animations, particles, tweens | `guide/animations.md`, `guide/particles.md`, `reference/tweens.md` |
 | Shaders, masks, shapes | `guide/rendering.md` |
+| Tile maps: ground, walls, grids of tiles | `guide/tilemaps.md` |
 | Text and UI | `guide/text-and-ui.md` |
 | Input, mobile | `reference/input.md`, `guide/mobile.md` |
 | Physics | `reference/physics.md` |
