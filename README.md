@@ -1,37 +1,24 @@
-<h1>Bare Template</h1>
-The starting point for a new project using the <a href="https://github.com/bare-engine/bare-engine">Bare Engine</a>.
+# Bare Template
 
-<br>
-<br>
+The starting point for a new game using [Bare Engine](https://github.com/bare-engine/bare-engine).
 
-<h2>Getting Started</h2>
+## Getting Started
 
-Install <a href="https://nodejs.org/en/download">Node</a> and <a href="https://git-scm.com/download/win">Git</a><br><br>
-<ol>
-    <li>Click Code->"Download ZIP" - unzip</li>
-    <li>Open the command line in the unzipped folder</li>
-    <li>Run <code>npm install</code> + <code>npm run dev</code></li>
-    <li>Ctrl-click the localhost URL shown in the command line.</li>
-</ol>
-<br>Or:<br>
-<ol>
-    <li>Click "Use this template" in the top right - create the repo.</li>
-    <li><pre><code>git clone https://github.com/PATH-TO-YOUR-REPO.git bare-game
-cd bare-game
-npm install
-npm run dev</code></pre></li>
-    <li>Ctrl-click the localhost URL shown in the command line.</li>
-</ol>
+Install [Node.js](https://nodejs.org/en/download) 20.9 or newer, then run:
 
-<br><br>
+```sh
+npm create bare-game@latest my-game
+cd my-game
+npm run dev
+```
 
-<h2>Getting Going</h2>
-<ol>
-    <li><a href="https://bare-engine.github.io/bare-engine/">Documentation</a> - Learn how everything works, starting with the <a href="https://bare-engine.github.io/bare-engine/guide/project-structure">project structure</a></li>
-    <li><a href="https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb">Chrome Extension</a> - Get the extension</li>
-    <li><a href="https://github.com/bare-engine/bare-showcase">Bare Showcase</a> - Explore the engine's features</li>
-    <li><a href="https://github.com/bare-engine/bare-demos">Bare Demos</a> - Explore game examples</li>
-</ol>
-<br>
+Ctrl-click the localhost URL shown in the terminal to open your game.
 
-Questions or bug reports? Join the <a href="https://discord.gg/zq3Qh45JE">Discord</a>.
+## Getting Going
+
+- [Documentation](https://bare-engine.github.io/bare-engine/): learn how everything works, starting with the [project structure](https://bare-engine.github.io/bare-engine/guide/project-structure)
+- [Chrome Extension](https://chromewebstore.google.com/detail/bare-engine/dbohigkcdpdnchgaffmofeoffnpkmphb): inspect and edit your game while it runs
+- [Bare Showcase](https://github.com/bare-engine/bare-showcase): explore the engine's features
+- [Example games](https://github.com/bare-engine/bare-example-games): complete games to learn from
+
+Questions or bug reports? Join the [Discord](https://discord.gg/zq3Qh45JE).
