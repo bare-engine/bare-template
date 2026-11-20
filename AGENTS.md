@@ -34,6 +34,7 @@ Links inside the docs leave out `.md`: `./components` means `components.md` in t
 | Screen size, pixel art | `guide/resolution.md` |
 | `bare` global, other globals, math | `reference/bare.md`, `reference/globals.md`, `reference/math.md` |
 | Inspector / serialization decorators | `reference/inspector-decorators.md` |
+| Debug fields and buttons for the extension | `guide/scenes.md` (Managers), `reference/inspector-decorators.md` |
 | Build, `bareEngine` options in package.json | `guide/building-and-publishing.md`, `reference/package-json.md` |
 | Something broken | `guide/troubleshooting.md`, `guide/debugging.md` |
 | Running the game in a headless browser, screenshots | `guide/debugging.md` (Testing in a headless browser) |
@@ -71,4 +72,5 @@ On PowerShell setups that block `npm.ps1`, use `npm.cmd`.
 - TypeScript is `strict`. Use `override` on lifecycle methods (`OnStart`, `OnFixedUpdate`, …).
 - Put behavior in components, and data in prefabs in `settingsData.json`. Only write a custom GameObject subclass when `guide/custom-game-objects.md` says it fits.
 - Use names from `src/generated/assets.ts` (`Asset.Image.X`, `Data.Prefab.X`) instead of string literals when they exist.
+- Put debug fields and buttons (values to watch or set while playing, cheats like skipping ahead) in a debug class on the scene they belong to, held as `@InspectorClass debug = new GameDebug(this);`, so the extension groups them under that scene. Use `@InspectorField` getters and setters, and `@InspectorButton` for actions. A UI scene gets its own debug class.
 - Production builds strip code, decorators and asset lists. If something works in dev but not in the build, read `reference/package-json.md`.
